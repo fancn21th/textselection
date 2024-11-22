@@ -1,33 +1,30 @@
+import { useEffect, useState, Fragment } from "react";
 import "./App.css";
 
+const text = `
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta, omnis eveniet quisquam iure, repellendus dicta eos consequatur id minima, reprehenderit tempore ipsa neque quidem quia unde. Corrupti doloremque molestias minima nesciunt eum. Cum quae tenetur est minima ut! Eveniet, iste asperiores delectus quam minus in blanditiis corrupti quas quasi neque officiis qui quidem sapiente. In sed, eligendi repudiandae soluta molestias beatae eum nisi quas ipsum, vel aperiam itaque tempore quis consequatur mollitia, natus placeat dolore obcaecati eaque quasi similique. Ducimus quisquam ut veritatis laudantium veniam, itaque eaque amet libero pariatur unde. Modi aliquam tenetur ipsam voluptatibus rem laborum mollitia assumenda?
+`;
+
 function App() {
+  const [content] = useState(text.split(" "));
+  const [cursorIndex, setCursorIndex] = useState(0);
+
+  const handleNext = () => {
+    // Increment cursor position (loop back at end)
+    setCursorIndex((prev) => (prev + 1) % content.length);
+  };
+
   return (
-    <div className="p-10">
+    <div className="p-10" onClick={handleNext}>
       <p className="mb-2">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus ex minus
-        illo necessitatibus magni quia unde sequi aspernatur, quasi quibusdam
-        aut obcaecati impedit ipsam quae dolor praesentium culpa labore
-        perspiciatis ipsum! Molestiae, quibusdam veniam. Consectetur doloremque,
-        vel praesentium fugit excepturi iure necessitatibus labore commodi! Quo
-        quae doloribus quas quos quam nemo fugit. Vel odit, laborum, harum
-        maiores provident doloremque ipsam saepe asperiores tenetur natus
-        voluptatibus vero magni quam atque! Architecto et ipsa fugit beatae,
-        voluptatibus quis impedit deserunt assumenda, illum, eos repellendus
-        tempora velit nobis! Fugit nemo nobis nisi quisquam. Quas maxime, quo
-        mollitia a reiciendis perferendis at libero praesentium.
-      </p>
-      <p className="mb-2">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus ex minus
-        illo necessitatibus magni quia unde sequi aspernatur, quasi quibusdam
-        aut obcaecati impedit ipsam quae dolor praesentium culpa labore
-        perspiciatis ipsum! Molestiae, quibusdam veniam. Consectetur doloremque,
-        vel praesentium fugit excepturi iure necessitatibus labore commodi! Quo
-        quae doloribus quas quos quam nemo fugit. Vel odit, laborum, harum
-        maiores provident doloremque ipsam saepe asperiores tenetur natus
-        voluptatibus vero magni quam atque! Architecto et ipsa fugit beatae,
-        voluptatibus quis impedit deserunt assumenda, illum, eos repellendus
-        tempora velit nobis! Fugit nemo nobis nisi quisquam. Quas maxime, quo
-        mollitia a reiciendis perferendis at libero praesentium.
+        {content.map((word, idx) => (
+          <Fragment key={idx}>
+            {idx === cursorIndex ? (
+              <span className="text-red-500">&#x2588;</span>
+            ) : null}
+            {word} &nbsp;
+          </Fragment>
+        ))}
       </p>
     </div>
   );
