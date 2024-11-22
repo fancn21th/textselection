@@ -7,7 +7,7 @@ const text = `
 `;
 
 function App() {
-  const [content] = useState(text.split(" "));
+  const [content] = useState(text.split(" ").filter((word) => word.length > 0));
   const [startCursorIndex, setStartCursorIndex] = useState(0);
   const [endCursorIndex, setEndCursorIndex] = useState(content.length - 1);
 
@@ -39,7 +39,7 @@ function App() {
         <h3>选中段落</h3> <hr className="my-2" />
         <p className="mb-2">
           {content.map((word, idx) => {
-            if (idx < startCursorIndex) return;
+            if (idx <= startCursorIndex) return;
             if (idx > endCursorIndex) return;
             return <Fragment key={idx}>{word} </Fragment>;
           })}
@@ -55,6 +55,9 @@ function App() {
           </div>
           <div>
             <span>Word Count: {content.length}</span>
+          </div>
+          <div>
+            <span>Range Count: {endCursorIndex - startCursorIndex + 1}</span>
           </div>
         </div>
         {/* action */}
