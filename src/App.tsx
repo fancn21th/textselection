@@ -11,16 +11,6 @@ function App() {
   const [startCursorIndex, setStartCursorIndex] = useState(0);
   const [endCursorIndex, setEndCursorIndex] = useState(content.length - 1);
 
-  const go = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.button === 0)
-      // Decrement cursor position (loop back at start)
-      setStartCursorIndex(
-        (prev) => (prev - 1 + content.length) % content.length
-      );
-    if (event.button === 2)
-      setStartCursorIndex((prev) => (prev + 1) % content.length);
-  };
-
   return (
     <>
       <div className="p-10">
@@ -54,9 +44,30 @@ function App() {
             return <Fragment key={idx}>{word} </Fragment>;
           })}
         </p>
+        <hr className="my-2" />
+        {/* debug info */}
+        <div className="border mb-2">
+          <div>
+            <span>Start Cursor Index: {startCursorIndex}</span>
+          </div>
+          <div>
+            <span>End Cursor Index: {endCursorIndex}</span>
+          </div>
+          <div>
+            <span>Word Count: {content.length}</span>
+          </div>
+        </div>
+        {/* action */}
         <ActionPanel
           onClick={(type, isAdd) => {
-            console.log(type, isAdd);
+            if (type === "start") {
+              setStartCursorIndex((prev) => (prev + 1) % content.length);
+            }
+            if (type === "end") {
+              setEndCursorIndex(
+                (prev) => (prev - 1 + content.length) % content.length
+              );
+            }
           }}
         />
       </div>
