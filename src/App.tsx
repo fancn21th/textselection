@@ -27,17 +27,24 @@ function App() {
         <h3>段落</h3>
         <hr className="my-2" />
         <p className="mb-2">
-          {content.map((word, idx) => (
-            <Fragment key={idx}>
-              {idx === startCursorIndex ? (
-                <span className="border-r-4 border-r-red-500 pr-1">🙉</span>
-              ) : null}
-              {idx === endCursorIndex ? (
-                <span className="border-l-4 border-l-red-500 pl-1">🙈</span>
-              ) : null}
-              {word}{" "}
-            </Fragment>
-          ))}
+          {content.map((word, idx) => {
+            if (idx === startCursorIndex) {
+              return (
+                <Fragment key={idx}>
+                  <span className="border-r-4 border-r-red-500 pr-1">🙉</span>
+                </Fragment>
+              );
+            }
+            if (idx === endCursorIndex) {
+              return (
+                <Fragment key={idx}>
+                  {word}{" "}
+                  <span className="border-l-4 border-l-red-500 pl-1">🙈</span>
+                </Fragment>
+              );
+            }
+            return <Fragment key={idx}>{word} </Fragment>;
+          })}
         </p>
         <h3>选中段落</h3> <hr className="my-2" />
         <p className="mb-2">
