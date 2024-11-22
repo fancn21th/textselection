@@ -9,24 +9,34 @@ function App() {
   const [content] = useState(text.split(" "));
   const [cursorIndex, setCursorIndex] = useState(0);
 
-  const handleNext = () => {
-    // Increment cursor position (loop back at end)
-    setCursorIndex((prev) => (prev + 1) % content.length);
+  const go = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button === 0)
+      // Decrement cursor position (loop back at start)
+      setCursorIndex((prev) => (prev - 1 + content.length) % content.length);
+    if (event.button === 2)
+      setCursorIndex((prev) => (prev + 1) % content.length);
   };
 
   return (
-    <div className="p-10" onClick={handleNext}>
-      <p className="mb-2">
-        {content.map((word, idx) => (
-          <Fragment key={idx}>
-            {idx === cursorIndex ? (
-              <span className="text-red-500">&#x2588;</span>
-            ) : null}
-            {word} &nbsp;
-          </Fragment>
-        ))}
-      </p>
-    </div>
+    <>
+      <h2>鼠标左键点击向左，右键点击向右，当前位置为：{cursorIndex}</h2>
+      <div
+        className="p-10"
+        onMouseDown={go}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        <p className="mb-2">
+          {content.map((word, idx) => (
+            <Fragment key={idx}>
+              {idx === cursorIndex ? (
+                <span className="text-red-500">&#x2588;</span>
+              ) : null}
+              {word}{" "}
+            </Fragment>
+          ))}
+        </p>
+      </div>
+    </>
   );
 }
 
