@@ -2,15 +2,17 @@ import { useState, Fragment } from "react";
 import ActionPanel from "./components/ActionPanel";
 import "./App.css";
 
-const splitter = "";
-
-// const text = `
-//   Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta, omnis eveniet quisquam iure, repellendus dicta eos consequatur id minima, reprehenderit tempore ipsa neque quidem quia unde. Corrupti doloremque molestias minima nesciunt eum. Cum quae tenetur est minima ut! Eveniet, iste asperiores delectus quam minus in blanditiis corrupti quas quasi neque officiis qui quidem sapiente. In sed, eligendi repudiandae soluta molestias beatae eum nisi quas ipsum, vel aperiam itaque tempore quis consequatur mollitia, natus placeat dolore obcaecati eaque quasi similique. Ducimus quisquam ut veritatis laudantium veniam, itaque eaque amet libero pariatur unde. Modi aliquam tenetur ipsam voluptatibus rem laborum mollitia assumenda?
-// `;
+const splitter = " ";
 
 const text = `
-  《兰亭集序》，又称作《兰亭序》、《兰亭叙》、《兰亭帖》、《禊序》、《禊帖》、《临河序》、《兰亭宴集序》。书法家王羲之所作，有“天下第一行书”之称，是晋代书法成就的代表。《兰亭集序》共计324字，凡是重复的字都各不相同，其中20个“之”字，各具风韵，皆无雷同。王羲之酒醒之后，过几天又把原文重写了好多本，但终究没有在兰亭集会时所写的好。[1]
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta, omnis eveniet quisquam iure, repellendus dicta eos consequatur id minima, reprehenderit tempore ipsa neque quidem quia unde. Corrupti doloremque molestias minima nesciunt eum. Cum quae tenetur est minima ut! Eveniet, iste asperiores delectus quam minus in blanditiis corrupti quas quasi neque officiis qui quidem sapiente. In sed, eligendi repudiandae soluta molestias beatae eum nisi quas ipsum, vel aperiam itaque tempore quis consequatur mollitia, natus placeat dolore obcaecati eaque quasi similique. Ducimus quisquam ut veritatis laudantium veniam, itaque eaque amet libero pariatur unde. Modi aliquam tenetur ipsam voluptatibus rem laborum mollitia assumenda?
 `;
+
+// const splitter = "";
+
+// const text = `
+//   《兰亭集序》，又称作《兰亭序》、《兰亭叙》、《兰亭帖》、《禊序》、《禊帖》、《临河序》、《兰亭宴集序》。书法家王羲之所作，有“天下第一行书”之称，是晋代书法成就的代表。《兰亭集序》共计324字，凡是重复的字都各不相同，其中20个“之”字，各具风韵，皆无雷同。王羲之酒醒之后，过几天又把原文重写了好多本，但终究没有在兰亭集会时所写的好。[1]
+// `;
 
 function App() {
   const [content] = useState(
@@ -36,12 +38,17 @@ function App() {
             if (idx === endCursorIndex) {
               return (
                 <Fragment key={idx}>
-                  {word}{" "}
+                  {word}
                   <span className="border-l-4 border-l-red-500 pl-1">🙈</span>
                 </Fragment>
               );
             }
-            return <Fragment key={idx}>{word} </Fragment>;
+            return (
+              <Fragment key={idx}>
+                {word}
+                {splitter}
+              </Fragment>
+            );
           })}
         </p>
         <h3>选中段落</h3> <hr className="my-2" />
@@ -49,7 +56,11 @@ function App() {
           {content.map((word, idx) => {
             if (idx <= startCursorIndex) return;
             if (idx > endCursorIndex) return;
-            return <Fragment key={idx}>{word} </Fragment>;
+            return (
+              <Fragment key={idx}>
+                {word} {splitter}
+              </Fragment>
+            );
           })}
         </p>
         <hr className="my-2" />
