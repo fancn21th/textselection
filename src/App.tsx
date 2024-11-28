@@ -8,38 +8,36 @@ const text = `
   Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta, omnis eveniet quisquam iure, repellendus dicta eos consequatur id minima, reprehenderit tempore ipsa neque quidem quia unde. Corrupti doloremque molestias minima nesciunt eum. Cum quae tenetur est minima ut! Eveniet, iste asperiores delectus quam minus in blanditiis corrupti quas quasi neque officiis qui quidem sapiente. In sed, eligendi repudiandae soluta molestias beatae eum nisi quas ipsum, vel aperiam itaque tempore quis consequatur mollitia, natus placeat dolore obcaecati eaque quasi similique. Ducimus quisquam ut veritatis laudantium veniam, itaque eaque amet libero pariatur unde. Modi aliquam tenetur ipsam voluptatibus rem laborum mollitia assumenda?
 `;
 
+type OriginCursor = { s: number; e: number };
+type MarkedCursor = {
+  s: number;
+  e: number;
+  index: number;
+  tailOverlapped: number;
+  headOverlapped: number;
+};
+type ResolvedCursor = {
+  s: number;
+  e: number;
+  index?: number;
+  overLapped?: boolean;
+};
+
 function App() {
   const [content] = useState(text.split(splitter));
-  const [cursors] = useState([
+  const [cursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },
     { s: 400, e: 600 },
     { s: 600, e: 700 },
   ]);
-  const [resolvedCursors, setResolvedCursors] = useState<
-    {
-      s: number;
-      e: number;
-      index?: number;
-      tailOverlapped?: number;
-      headOverlapped?: number;
-    }[]
-  >([]);
+  const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
 
   useEffect(() => {
     // 排序
     const sorted = cursors.slice().sort((a, b) => a.s - b.s);
     const indexed = sorted.map(
-      (
-        cursor,
-        index
-      ): {
-        s: number;
-        e: number;
-        index: number;
-        tailOverlapped: number;
-        headOverlapped: number;
-      } => ({
+      (cursor, index): MarkedCursor => ({
         ...cursor,
         index,
         tailOverlapped: -1,
@@ -61,14 +59,78 @@ function App() {
 
     console.log({ indexed });
 
+    // 重叠处理
+    const overlapped = indexed.reduce<ResolvedCursor[]>((acc, current) => {
+      if (current.headOverlapped !== -1 && current.tailOverlapped !== -1) {
+        return [
+          ...acc,
+          {
+            s: current.s,
+            e: current.headOverlapped,
+            index: current.index,
+            overLapped: true,
+          },
+          {
+            s: current.headOverlapped,
+            e: current.tailOverlapped,
+            index: current.index,
+            overLapped: false,
+          },
+          {
+            s: current.tailOverlapped,
+            e: current.e,
+            index: current.index,
+            overLapped: true,
+          },
+        ];
+      }
+      if (current.headOverlapped !== -1) {
+        return [
+          ...acc,
+          {
+            s: current.s,
+            e: current.headOverlapped,
+            index: current.index,
+            overLapped: true,
+          },
+          {
+            s: current.headOverlapped,
+            e: current.e,
+            index: current.index,
+            overLapped: false,
+          },
+        ];
+      }
+      if (current.tailOverlapped !== -1) {
+        return [
+          ...acc,
+          {
+            s: current.s,
+            e: current.tailOverlapped,
+            index: current.index,
+            overLapped: false,
+          },
+          {
+            s: current.tailOverlapped,
+            e: current.e,
+            index: current.index,
+            overLapped: true,
+          },
+        ];
+      }
+      return [...acc, { ...current, index: current.index, overLapped: false }];
+    }, []);
+
+    console.log({ overlapped });
+
     // 填充空隙
     const filledCursors = [];
     let lastEnd = 0;
-    for (const { s, e, index, headOverlapped, tailOverlapped } of indexed) {
+    for (const { s, e, index } of overlapped) {
       if (s > lastEnd) {
         filledCursors.push({ s: lastEnd, e: s });
       }
-      filledCursors.push({ s, e, index, headOverlapped, tailOverlapped });
+      filledCursors.push({ s, e, index });
       lastEnd = e;
     }
     if (lastEnd < content.length) {
