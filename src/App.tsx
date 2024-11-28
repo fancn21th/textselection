@@ -11,44 +11,48 @@ const text = `
 function App() {
   const [content] = useState(text.split(splitter));
   const [cursors] = useState([
-    { s: 600, e: 800 },
-    { s: 100, e: 200 },
-    { s: 200, e: 400 },
-    { s: 400, e: 600 },
+    { s: 100, e: 300 },
+    { s: 200, e: 500 },
+    { s: 500, e: 600 },
+    { s: 600, e: 700 },
   ]);
   const [resolvedCursors, setResolvedCursors] = useState<
-    { s: number; e: number }[]
+    { s: number; e: number; index?: number }[]
   >([]);
 
   useEffect(() => {
-    // 首先按照开始位置排序
-    const indexed = cursors.map((cursor, index) => {
-      return { ...cursor, index };
-    });
-    const sorted = indexed.sort((a, b) => a.s - b.s);
-    const filled = [];
-    let lastEnd = 0;
+    // 排序
+    const sorted = cursors.slice().sort((a, b) => a.s - b.s);
+    const indexed = sorted.map((cursor, index) => ({ ...cursor, index }));
 
-    for (const { s, e } of sorted) {
+    console.log({ indexed });
+
+    // 填充空隙
+    const filledCursors = [];
+    let lastEnd = 0;
+    for (const { s, e, index } of indexed) {
       if (s > lastEnd) {
-        // 插入缺失的区间
-        filled.push({ s: lastEnd, e: s });
+        filledCursors.push({ s: lastEnd, e: s });
       }
-      filled.push({ s, e });
+      filledCursors.push({ s, e, index });
       lastEnd = e;
     }
-    // 填充空缺
-    setResolvedCursors(sorted);
+    if (lastEnd < content.length) {
+      filledCursors.push({ s: lastEnd, e: content.length });
+    }
+
+    console.log({ filledCursors });
+
+    setResolvedCursors(filledCursors);
   }, [cursors]);
 
   const parts = resolvedCursors.map((cursor) => {
     const text = content.slice(cursor.s, cursor.e);
     return {
       text,
+      index: cursor.index,
     };
   });
-
-  console.log(cursors);
 
   return (
     <>
@@ -61,8 +65,8 @@ function App() {
               <span
                 key={index}
                 className={
-                  index
-                    ? index % 2 === 0
+                  part.index !== undefined
+                    ? part.index % 2 === 0
                       ? "bg-red-300"
                       : "bg-green-300"
                     : "bg-transparent"
