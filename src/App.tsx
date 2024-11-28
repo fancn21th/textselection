@@ -123,14 +123,27 @@ function App() {
 
     console.log({ overlapped });
 
+    // 去掉重复的 重叠
+    const deduped = [];
+    const pos = new Set();
+    for (const cursor of overlapped) {
+      const key = `${cursor.s}-${cursor.e}`;
+      if (!pos.has(key)) {
+        pos.add(key);
+        deduped.push(cursor);
+      }
+    }
+
+    console.log({ deduped });
+
     // 填充空隙
     const filledCursors = [];
     let lastEnd = 0;
-    for (const { s, e, index } of overlapped) {
+    for (const { s, e, index, overLapped } of deduped) {
       if (s > lastEnd) {
         filledCursors.push({ s: lastEnd, e: s });
       }
-      filledCursors.push({ s, e, index });
+      filledCursors.push({ s, e, index, overLapped });
       lastEnd = e;
     }
     if (lastEnd < content.length) {
