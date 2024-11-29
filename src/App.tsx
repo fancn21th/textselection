@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import clsx from "clsx";
+import { DndProvider, useDrag } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { Fragment, useEffect, useState } from "react";
 // import ActionPanel from "./components/ActionPanel";
 import "./App.css";
 
@@ -22,6 +25,21 @@ type ResolvedCursor = {
   index?: number;
   overLapped?: boolean;
 };
+
+function Cursor() {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "CURSOR",
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
+
+  return (
+    <span className="text-red-400" ref={drag}>
+      |
+    </span>
+  );
+}
 
 function App() {
   const [content] = useState(text.split(splitter));
@@ -165,27 +183,25 @@ function App() {
   });
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <div className="p-10">
         <h3>段落</h3>
         <hr className="my-2" />
         <p className="mb-2">
           {parts.map((part, index) => {
             return (
-              <span
-                key={index}
-                className={
-                  part.overLapped
-                    ? "bg-gray-300"
-                    : part.index !== undefined
-                    ? part.index % 2 === 0
-                      ? "bg-red-300"
-                      : "bg-green-300"
-                    : "bg-transparent"
-                }
-              >
-                {part.text}
-              </span>
+              <Fragment key={index}>
+                <span
+                  className={clsx(
+                    part.overLapped && "bg-gray-300",
+                    part.index && part.index % 2 === 0 && "bg-red-300",
+                    part.index && part.index % 2 === 1 && "bg-green-300"
+                  )}
+                >
+                  {part.text}
+                </span>
+                <Cursor />
+              </Fragment>
             );
           })}
         </p>
@@ -197,7 +213,7 @@ function App() {
         <div className="border mb-2 p-2">长度: {content.length}</div>
         {/* action */}
       </div>
-    </>
+    </DndProvider>
   );
 }
 
