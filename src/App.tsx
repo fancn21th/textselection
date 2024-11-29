@@ -189,13 +189,19 @@ function App() {
         <hr className="my-2" />
         <p className="mb-2">
           {parts.map((part, index) => {
+            const even = !!(
+              (part.index && part.index % 2 === 0) ||
+              part.index === 0
+            );
+            const odd = !!(part.index && part.index % 2 === 1);
+
             return (
               <Fragment key={index}>
                 <span
                   className={clsx(
-                    part.overLapped && "bg-gray-300",
-                    part.index && part.index % 2 === 0 && "bg-red-300",
-                    part.index && part.index % 2 === 1 && "bg-green-300"
+                    !part.overLapped && even && "bg-red-300",
+                    !part.overLapped && odd && "bg-green-300",
+                    part.overLapped && "bg-gray-300"
                   )}
                 >
                   {part.text}
