@@ -160,6 +160,7 @@ function App() {
     return {
       text,
       index: cursor.index,
+      overLapped: cursor.overLapped,
     };
   });
 
@@ -174,7 +175,9 @@ function App() {
               <span
                 key={index}
                 className={
-                  part.index !== undefined
+                  part.overLapped
+                    ? "bg-gray-300"
+                    : part.index !== undefined
                     ? part.index % 2 === 0
                       ? "bg-red-300"
                       : "bg-green-300"
