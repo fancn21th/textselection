@@ -137,22 +137,22 @@ function App() {
     console.log({ deduped });
 
     // 填充空隙
-    const filledCursors = [];
+    const gapFilled = [];
     let lastEnd = 0;
     for (const { s, e, index, overLapped } of deduped) {
       if (s > lastEnd) {
-        filledCursors.push({ s: lastEnd, e: s });
+        gapFilled.push({ s: lastEnd, e: s });
       }
-      filledCursors.push({ s, e, index, overLapped });
+      gapFilled.push({ s, e, index, overLapped });
       lastEnd = e;
     }
     if (lastEnd < content.length) {
-      filledCursors.push({ s: lastEnd, e: content.length });
+      gapFilled.push({ s: lastEnd, e: content.length });
     }
 
-    console.log({ filledCursors });
+    console.log({ gapFilled });
 
-    setResolvedCursors(filledCursors);
+    setResolvedCursors(gapFilled);
   }, [cursors]);
 
   const parts = resolvedCursors.map((cursor) => {
