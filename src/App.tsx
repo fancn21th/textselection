@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { DndProvider, useDrag } from "react-dnd";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Fragment, useEffect, useState } from "react";
 // import ActionPanel from "./components/ActionPanel";
@@ -24,26 +24,86 @@ type ResolvedCursor = {
   e: number;
   index?: number;
   overLapped?: boolean;
+  isGap?: boolean;
+};
+type CursorPosition = {
+  pos: number;
+  type: string;
+  origin: number;
+};
+type Part = {
+  text: string; // 段落内容
+  index: number; // 段落索引
+  overLapped: boolean; // 是否重叠部分
+  isGap: boolean; // 是否空隙
+  isEven: boolean; // 是否索引偶数
+  isOdd: boolean; // 是否索引奇数
+};
+type Combo = Part | CursorPosition;
+type CharType = {
+  isCursor: boolean;
+  char: string;
+  pos?: CursorPosition;
+  index: number;
 };
 
-function Cursor() {
+function Cursor(pos: CursorPosition) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
+    item: () => {
+      return pos;
+    },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
 
   return (
-    <span className="text-red-400" ref={drag}>
+    <span
+      className={clsx("text-red-400", isDragging && "opacity-50")}
+      ref={drag}
+    >
       |
+    </span>
+  );
+}
+
+function CursorGhost() {
+  return <span className="text-red-400">|</span>;
+}
+
+function Char({
+  children,
+  index,
+  onDrop,
+}: {
+  children: React.ReactNode;
+  index: number;
+  onDrop: (pos: CursorPosition, newPos: number) => void;
+}) {
+  const [{ isOver }, drop] = useDrop(
+    () => ({
+      accept: "CURSOR",
+      drop: (item) => {
+        onDrop(item as CursorPosition, index);
+      },
+      collect: (monitor) => ({
+        isOver: !!monitor.isOver(),
+      }),
+    }),
+    [index]
+  );
+
+  return (
+    <span ref={drop} className={clsx(isOver && "bg-gray-200")}>
+      {children}
     </span>
   );
 }
 
 function App() {
   const [content] = useState(text.split(splitter));
-  const [cursors] = useState<OriginCursor[]>([
+  const [cursors, setCursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },
     { s: 400, e: 600 },
@@ -54,6 +114,8 @@ function App() {
   useEffect(() => {
     // 排序
     const sorted = cursors.slice().sort((a, b) => a.s - b.s);
+    console.log({ sorted });
+
     const indexed = sorted.map(
       (cursor, index): MarkedCursor => ({
         ...cursor,
@@ -159,13 +221,13 @@ function App() {
     let lastEnd = 0;
     for (const { s, e, index, overLapped } of deduped) {
       if (s > lastEnd) {
-        gapFilled.push({ s: lastEnd, e: s });
+        gapFilled.push({ s: lastEnd, e: s, isGap: true });
       }
       gapFilled.push({ s, e, index, overLapped });
       lastEnd = e;
     }
     if (lastEnd < content.length) {
-      gapFilled.push({ s: lastEnd, e: content.length });
+      gapFilled.push({ s: lastEnd, e: content.length, isGap: true });
     }
 
     console.log({ gapFilled });
@@ -173,50 +235,158 @@ function App() {
     setResolvedCursors(gapFilled);
   }, [cursors]);
 
-  const parts = resolvedCursors.map((cursor) => {
-    const text = content.slice(cursor.s, cursor.e);
-    return {
-      text,
-      index: cursor.index,
-      overLapped: cursor.overLapped,
-    };
-  });
+  // derived state
+
+  // Cursor 坐标
+  const cursorPositions = cursors.reduce<CursorPosition[]>(
+    (acc, cursor, index) => {
+      return [
+        ...acc,
+        { pos: cursor.s, type: "s", origin: index },
+        { pos: cursor.e, type: "e", origin: index },
+      ];
+    },
+    []
+  );
+
+  console.log({ cursorPositions });
+
+  const sortedPositions = cursorPositions.slice().sort((a, b) => a.pos - b.pos);
+
+  console.log({ sortedPositions });
+
+  let pos = 0;
+  const parts = resolvedCursors.reduce<Combo[]>((acc, cursor) => {
+    const text = content.slice(cursor.s, cursor.e).join("");
+    const append: Combo[] = [
+      {
+        text,
+        index: cursor.index!,
+        overLapped: cursor.overLapped!,
+        isGap: cursor.isGap!,
+        isEven: cursor.index! % 2 === 0,
+        isOdd: cursor.index! % 2 === 1,
+      },
+    ];
+    if (pos < sortedPositions.length) {
+      if (
+        sortedPositions[pos].type === "s" &&
+        cursor.s === sortedPositions[pos].pos
+      ) {
+        append.unshift({
+          ...sortedPositions[pos],
+        });
+        pos++;
+      }
+      if (
+        sortedPositions[pos].type === "e" &&
+        cursor.e === sortedPositions[pos].pos
+      ) {
+        append.push({
+          ...sortedPositions[pos],
+        });
+        pos++;
+      }
+    }
+    return [...acc, ...append];
+  }, []);
+
+  console.log({ parts });
+
+  pos = 0;
+  const chars = text.split(splitter).reduce<CharType[]>((acc, char, index) => {
+    const append: CharType[] = [{ char, index, isCursor: false }];
+    if (pos < sortedPositions.length) {
+      if (sortedPositions[pos].pos === index) {
+        append.unshift({
+          char: "",
+          index,
+          isCursor: true,
+          pos: sortedPositions[pos],
+        });
+        pos++;
+      }
+    }
+    return [...acc, ...append];
+  }, []);
+
+  const onDrop = (pos: CursorPosition, newPos: number) => {
+    const temPos = pos.pos as unknown;
+
+    console.log(temPos);
+
+    setCursors((prevCursors) => {
+      return prevCursors.map((cursor, index) => {
+        if ((temPos as CursorPosition).origin === index) {
+          if ((temPos as CursorPosition).type === "s") {
+            return { ...cursor, s: newPos };
+          }
+          if ((temPos as CursorPosition).type === "e") {
+            return { ...cursor, e: newPos };
+          }
+        }
+        return cursor;
+      });
+    });
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="p-10">
-        <h3>段落</h3>
+        <h3>高亮</h3>
         <hr className="my-2" />
         <p className="mb-2">
           {parts.map((part, index) => {
-            const even = !!(
-              (part.index && part.index % 2 === 0) ||
-              part.index === 0
-            );
-            const odd = !!(part.index && part.index % 2 === 1);
-
-            return (
-              <Fragment key={index}>
-                <span
-                  className={clsx(
-                    !part.overLapped && even && "bg-red-300",
-                    !part.overLapped && odd && "bg-green-300",
-                    part.overLapped && "bg-gray-300"
-                  )}
-                >
-                  {part.text}
-                </span>
-                <Cursor />
-              </Fragment>
-            );
+            if ("text" in part) {
+              return (
+                <Fragment key={index}>
+                  <span
+                    className={clsx(
+                      !part.overLapped && part.isEven && "bg-red-300",
+                      !part.overLapped && part.isOdd && "bg-green-300",
+                      part.overLapped && "bg-gray-300"
+                    )}
+                  >
+                    {part.text}
+                  </span>
+                </Fragment>
+              );
+            }
+            return <CursorGhost key={index}></CursorGhost>;
           })}
         </p>
         <hr className="my-2" />
+        <h3>Span-ed</h3>
+        <hr className="my-2" />
+        <p className="mb-2">
+          <>
+            {chars.map((char, index) => {
+              if (char.isCursor) {
+                return <Cursor key={index} pos={char.pos}></Cursor>;
+              }
+              return (
+                <Char key={index} index={char.index} onDrop={onDrop}>
+                  {char.char}
+                </Char>
+              );
+            })}
+          </>
+        </p>
+        <hr className="my-2" />
         <h3>原文</h3>
+        <hr className="my-2" />
         <p className="mb-2">{text}</p>
         <hr className="my-2" />
         {/* debug info */}
-        <div className="border mb-2 p-2">长度: {content.length}</div>
+        <div className="border mb-2 p-2">
+          <ul>
+            <li>长度: {content.length}</li>
+            <li>
+              分段:
+              <pre>{JSON.stringify(cursors, null, 2)}</pre>
+            </li>
+          </ul>
+        </div>
         {/* action */}
       </div>
     </DndProvider>
