@@ -60,7 +60,10 @@ function Cursor(pos: CursorPosition) {
 
   return (
     <span
-      className={clsx("text-red-400", isDragging && "opacity-50")}
+      className={clsx(
+        "text-red-400 font-extrabold",
+        isDragging && "opacity-50"
+      )}
       ref={drag}
     >
       |
@@ -106,15 +109,15 @@ function App() {
   const [cursors, setCursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },
-    { s: 400, e: 600 },
-    { s: 600, e: 700 },
+    // { s: 400, e: 600 },
+    // { s: 600, e: 700 },
   ]);
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
 
   useEffect(() => {
     // 排序
     const sorted = cursors.slice().sort((a, b) => a.s - b.s);
-    console.log({ sorted });
+    // console.log({ sorted });
 
     const indexed = sorted.map(
       (cursor, index): MarkedCursor => ({
@@ -137,7 +140,7 @@ function App() {
       last = current;
     }
 
-    console.log({ indexed });
+    // console.log({ indexed });
 
     // 重叠处理
     const overlapped = indexed.reduce<ResolvedCursor[]>((acc, current) => {
@@ -201,7 +204,7 @@ function App() {
       return [...acc, { ...current, index: current.index, overLapped: false }];
     }, []);
 
-    console.log({ overlapped });
+    // console.log({ overlapped });
 
     // 去掉重复的 重叠
     const deduped = [];
@@ -214,7 +217,7 @@ function App() {
       }
     }
 
-    console.log({ deduped });
+    // console.log({ deduped });
 
     // 填充空隙
     const gapFilled = [];
@@ -230,12 +233,12 @@ function App() {
       gapFilled.push({ s: lastEnd, e: content.length, isGap: true });
     }
 
-    console.log({ gapFilled });
+    // console.log({ gapFilled });
 
     setResolvedCursors(gapFilled);
   }, [cursors]);
 
-  // derived state
+  // derived state 以下都是派生状态
 
   // Cursor 坐标
   const cursorPositions = cursors.reduce<CursorPosition[]>(
@@ -249,11 +252,11 @@ function App() {
     []
   );
 
-  console.log({ cursorPositions });
+  // console.log({ cursorPositions });
 
   const sortedPositions = cursorPositions.slice().sort((a, b) => a.pos - b.pos);
 
-  console.log({ sortedPositions });
+  // console.log({ sortedPositions });
 
   let pos = 0;
   const parts = resolvedCursors.reduce<Combo[]>((acc, cursor) => {
@@ -291,21 +294,19 @@ function App() {
     return [...acc, ...append];
   }, []);
 
-  console.log({ parts });
+  // console.log({ parts });
 
   pos = 0;
   const chars = text.split(splitter).reduce<CharType[]>((acc, char, index) => {
     const append: CharType[] = [{ char, index, isCursor: false }];
-    if (pos < sortedPositions.length) {
-      if (sortedPositions[pos].pos === index) {
-        append.unshift({
-          char: "",
-          index,
-          isCursor: true,
-          pos: sortedPositions[pos],
-        });
-        pos++;
-      }
+    if (pos < sortedPositions.length && sortedPositions[pos].pos === index) {
+      append.unshift({
+        char: "",
+        index,
+        isCursor: true,
+        pos: sortedPositions[pos],
+      });
+      pos++;
     }
     return [...acc, ...append];
   }, []);
@@ -313,7 +314,7 @@ function App() {
   const onDrop = (pos: CursorPosition, newPos: number) => {
     const temPos = pos.pos as unknown;
 
-    console.log(temPos);
+    // console.log(temPos);
 
     setCursors((prevCursors) => {
       return prevCursors.map((cursor, index) => {
@@ -333,7 +334,7 @@ function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="p-10">
-        <h3>高亮</h3>
+        <h3>高亮 不可拖拽</h3>
         <hr className="my-2" />
         <p className="mb-2">
           {parts.map((part, index) => {
@@ -356,7 +357,7 @@ function App() {
           })}
         </p>
         <hr className="my-2" />
-        <h3>Span-ed</h3>
+        <h3>Span-ed 拖拽可行</h3>
         <hr className="my-2" />
         <p className="mb-2">
           <>
