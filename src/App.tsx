@@ -7,6 +7,15 @@ import "./App.css";
 
 const splitter = "";
 
+const predefinedColors = [
+  "text-red-500",
+  "text-blue-500",
+  "text-green-500",
+  "text-yellow-500",
+  "text-purple-500",
+  "text-pink-500",
+];
+
 const text = `
   Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta, omnis eveniet quisquam iure, repellendus dicta eos consequatur id minima, reprehenderit tempore ipsa neque quidem quia unde. Corrupti doloremque molestias minima nesciunt eum. Cum quae tenetur est minima ut! Eveniet, iste asperiores delectus quam minus in blanditiis corrupti quas quasi neque officiis qui quidem sapiente. In sed, eligendi repudiandae soluta molestias beatae eum nisi quas ipsum, vel aperiam itaque tempore quis consequatur mollitia, natus placeat dolore obcaecati eaque quasi similique. Ducimus quisquam ut veritatis laudantium veniam, itaque eaque amet libero pariatur unde. Modi aliquam tenetur ipsam voluptatibus rem laborum mollitia assumenda?
 `;
@@ -61,7 +70,8 @@ function Cursor({ pos }: { pos: CursorPosition }) {
   return (
     <span
       className={clsx(
-        "text-red-400 font-extrabold",
+        "font-extrabold",
+        predefinedColors[pos.origin % predefinedColors.length],
         isDragging && "opacity-50"
       )}
       ref={drag}
@@ -71,8 +81,17 @@ function Cursor({ pos }: { pos: CursorPosition }) {
   );
 }
 
-function CursorGhost() {
-  return <span className="text-red-400">|</span>;
+function CursorGhost({ index }: { index: number }) {
+  return (
+    <span
+      className={clsx(
+        "font-extrabold",
+        predefinedColors[index % predefinedColors.length]
+      )}
+    >
+      |
+    </span>
+  );
 }
 
 function Char({
@@ -349,7 +368,7 @@ function App() {
                 </Fragment>
               );
             }
-            return <CursorGhost key={index}></CursorGhost>;
+            return <CursorGhost key={index} index={part.origin}></CursorGhost>;
           })}
         </p>
         <hr className="my-2" />
