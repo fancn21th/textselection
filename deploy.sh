@@ -6,9 +6,6 @@ set -e
 # 生成静态文件
 npm run build
 
-# 拷贝文件
-cp -f dist/
-
 # 进入生成的文件夹
 cd ./dist
 
