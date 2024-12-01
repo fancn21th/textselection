@@ -43,11 +43,11 @@ type Combo = Part | CursorPosition;
 type CharType = {
   isCursor: boolean;
   char: string;
-  pos?: CursorPosition;
+  pos: CursorPosition | null;
   index: number;
 };
 
-function Cursor(pos: CursorPosition) {
+function Cursor({ pos }: { pos: CursorPosition }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
     item: () => {
@@ -298,7 +298,7 @@ function App() {
 
   pos = 0;
   const chars = text.split(splitter).reduce<CharType[]>((acc, char, index) => {
-    const append: CharType[] = [{ char, index, isCursor: false }];
+    const append: CharType[] = [{ char, index, isCursor: false, pos: null }];
     if (pos < sortedPositions.length && sortedPositions[pos].pos === index) {
       append.unshift({
         char: "",
@@ -312,17 +312,13 @@ function App() {
   }, []);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
-    const temPos = pos.pos as unknown;
-
-    // console.log(temPos);
-
     setCursors((prevCursors) => {
       return prevCursors.map((cursor, index) => {
-        if ((temPos as CursorPosition).origin === index) {
-          if ((temPos as CursorPosition).type === "s") {
+        if (pos.origin === index) {
+          if (pos.type === "s") {
             return { ...cursor, s: newPos };
           }
-          if ((temPos as CursorPosition).type === "e") {
+          if (pos.type === "e") {
             return { ...cursor, e: newPos };
           }
         }
@@ -362,7 +358,7 @@ function App() {
         <p className="mb-2">
           <>
             {chars.map((char, index) => {
-              if (char.isCursor) {
+              if (char.isCursor && char.pos) {
                 return <Cursor key={index} pos={char.pos}></Cursor>;
               }
               return (
