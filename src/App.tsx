@@ -330,7 +330,7 @@ function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="p-10">
-        <h3>高亮 不可拖拽</h3>
+        <h3>分段高亮渲染层 不可拖拽</h3>
         <hr className="my-2" />
         <p className="mb-2">
           {parts.map((part, index) => {
@@ -353,7 +353,7 @@ function App() {
           })}
         </p>
         <hr className="my-2" />
-        <h3>Span-ed 拖拽可行</h3>
+        <h3>分段高亮控制层 可以拖拽 无约束条件</h3>
         <hr className="my-2" />
         <p className="mb-2">
           <>
