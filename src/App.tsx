@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 // import ActionPanel from "./components/ActionPanel";
 import "./App.css";
 
@@ -132,8 +132,11 @@ function App() {
     // { s: 600, e: 700 },
   ]);
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
+  const start = useRef(0);
+  const end = useRef(0);
 
   useEffect(() => {
+    start.current = performance.now();
     // 排序
     const sorted = cursors.slice().sort((a, b) => a.s - b.s);
     // console.log({ sorted });
@@ -330,6 +333,8 @@ function App() {
     return [...acc, ...append];
   }, []);
 
+  end.current = performance.now();
+
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setCursors((prevCursors) => {
       return prevCursors.map((cursor, index) => {
@@ -402,6 +407,9 @@ function App() {
               <pre>{JSON.stringify(cursors, null, 2)}</pre>
             </li>
           </ul>
+          <span>
+            计算耗费时间: {`Execution time: ${end.current - start.current} ms`}
+          </span>
         </div>
         {/* action */}
       </div>
