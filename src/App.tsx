@@ -17,7 +17,7 @@ function App() {
     <div className="p-10">
       <h1 className="font-bold">Text Range Selection</h1>
       <hr className="my-2" />
-      <div className="relative">
+      <div className="relative w-[800px]">
         <DragnDropRender></DragnDropRender>
         <BackgroundRender></BackgroundRender>
         <TextRender></TextRender>

@@ -20,8 +20,14 @@ type Part = {
 type Combo = Part | CursorPosition;
 
 function Background() {
-  const { cursors, resolvedCursors, content, sortedPositions, executionTime } =
-    useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
+  const {
+    cursors,
+    resolvedCursors,
+    content,
+    sortedPositions,
+    executionTime,
+    text,
+  } = useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   let pos = 0;
   const parts = resolvedCursors.reduce<Combo[]>((acc, cursor) => {
@@ -85,7 +91,8 @@ function Background() {
       </div>
 
       {createPortal(
-        <div className="fixed bottom-0 right-0 p-4 bg-white shadow-lg m-1">
+        <div className="fixed bottom-1 right-1 p-4 bg-white border border-gray-500 rounded">
+          字符长度: <p>{text.length}</p>
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
           背景计算耗时: <p>{`Execution time: ${executionTime} ms`}</p>
         </div>,
