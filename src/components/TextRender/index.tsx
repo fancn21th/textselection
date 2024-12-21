@@ -1,8 +1,6 @@
 import { useContext } from "react";
-import {
-  TextRangeSelectionContext,
-  TextRangeSelectionContextType,
-} from "../../context/TextRangeSelectionContext";
+import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
+import type { TextRangeSelectionContextType } from "../../context/TextRangeSelectionContext";
 
 function Text() {
   const { text } = useContext<TextRangeSelectionContextType>(

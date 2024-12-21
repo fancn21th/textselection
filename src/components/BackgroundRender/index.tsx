@@ -1,12 +1,14 @@
 import clsx from "clsx";
 import { Fragment, useContext } from "react";
 import { CursorGhost } from "../DragnDropRender";
-import type { CursorPosition } from "../DragnDropRender";
 import { createPortal } from "react-dom";
 import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
-import type { TextRangeSelectionContextType } from "../../context/TextRangeSelectionContext";
+import type {
+  TextRangeSelectionContextType,
+  CursorPosition,
+} from "../../context/TextRangeSelectionContext";
 
-export type Part = {
+type Part = {
   text: string; // 段落内容
   index: number; // 段落索引
   overLapped: boolean; // 是否重叠部分
@@ -14,6 +16,7 @@ export type Part = {
   isEven: boolean; // 是否索引偶数
   isOdd: boolean; // 是否索引奇数
 };
+
 type Combo = Part | CursorPosition;
 
 function Background() {

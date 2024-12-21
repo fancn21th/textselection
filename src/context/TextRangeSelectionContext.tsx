@@ -1,7 +1,6 @@
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { createContext, useEffect, useRef, useState } from "react";
-import { CursorPosition } from "../components/DragnDropRender";
 
 // Constants
 const splitter = "";
@@ -25,6 +24,19 @@ export type ResolvedCursor = {
   isGap?: boolean;
 };
 
+export type CursorPosition = {
+  pos: number;
+  type: string;
+  origin: number;
+};
+
+export type CharType = {
+  isCursor: boolean;
+  char: string;
+  pos: CursorPosition | null;
+  index: number;
+};
+
 // Types for context value
 export type TextRangeSelectionContextType = {
   cursors: OriginCursor[];
@@ -35,14 +47,22 @@ export type TextRangeSelectionContextType = {
   content: string[];
   sortedPositions: CursorPosition[];
   executionTime: number;
-} | null;
+};
 
 // 创建 Context
 export const TextRangeSelectionContext =
-  createContext<TextRangeSelectionContextType>(null);
+  createContext<TextRangeSelectionContextType>(
+    {} as TextRangeSelectionContextType
+  );
 
 // 创建 Provider 组件
-export const TextRangeSelectionProvider = ({ children }) => {
+import { ReactNode } from "react";
+
+export const TextRangeSelectionProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [cursors, setCursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },

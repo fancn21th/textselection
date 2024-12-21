@@ -2,7 +2,12 @@ import clsx from "clsx";
 import { useContext } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
-import type { TextRangeSelectionContextType } from "../../context/TextRangeSelectionContext";
+import type {
+  OriginCursor,
+  TextRangeSelectionContextType,
+  CursorPosition,
+  CharType,
+} from "../../context/TextRangeSelectionContext";
 
 const predefinedColors = [
   "text-red-500",
@@ -53,19 +58,6 @@ export function CursorGhost({ index }: { index: number }) {
   );
 }
 
-export type CursorPosition = {
-  pos: number;
-  type: string;
-  origin: number;
-};
-
-export type CharType = {
-  isCursor: boolean;
-  char: string;
-  pos: CursorPosition | null;
-  index: number;
-};
-
 function Char({
   children,
   index,
@@ -101,7 +93,7 @@ function DragNDrop() {
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setCursors((prevCursors) => {
-      return prevCursors.map((cursor, index) => {
+      return prevCursors.map((cursor: OriginCursor, index: number) => {
         if (pos.origin === index) {
           if (pos.type === "s") {
             return { ...cursor, s: newPos };
