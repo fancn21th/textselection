@@ -228,30 +228,33 @@ function Background({ text }: { text: string }) {
 
   return (
     <>
-      {parts.map((part, index) => {
-        if ("text" in part) {
-          return (
-            <Fragment key={index}>
-              <span
-                className={clsx(
-                  "text-transparent",
-                  !part.overLapped && part.isEven && "bg-red-300",
-                  !part.overLapped && part.isOdd && "bg-green-300",
-                  part.overLapped && "bg-gray-300"
-                )}
-              >
-                {part.text}
-              </span>
-            </Fragment>
-          );
-        }
-        return <CursorGhost key={index} index={part.origin}></CursorGhost>;
-      })}
+      <div className="absolute">
+        {parts.map((part, index) => {
+          if ("text" in part) {
+            return (
+              <Fragment key={index}>
+                <span
+                  className={clsx(
+                    "text-transparent",
+                    !part.overLapped && part.isEven && "bg-red-300",
+                    !part.overLapped && part.isOdd && "bg-green-300",
+                    part.overLapped && "bg-gray-300"
+                  )}
+                >
+                  {part.text}
+                </span>
+              </Fragment>
+            );
+          }
+          return <CursorGhost key={index} index={part.origin}></CursorGhost>;
+        })}
+      </div>
 
       {createPortal(
-        <div className="fixed bottom-0 right-0 p-4 bg-white shadow-lg">
+        <div className="fixed bottom-0 right-0 p-4 bg-white shadow-lg m-1">
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
-          计算耗费时间: {`Execution time: ${end.current - start.current} ms`}
+          背景计算耗时:{" "}
+          <p>{`Execution time: ${end.current - start.current} ms`}</p>
         </div>,
         document.body
       )}

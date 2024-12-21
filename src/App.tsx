@@ -14,8 +14,8 @@ function App() {
         <h3>原文</h3>
         <hr className="my-2" />
         <div>
-          <TextRender text={text}></TextRender>
           <BackgroundRender text={text}></BackgroundRender>
+          <TextRender text={text}></TextRender>
         </div>
       </div>
     </DndProvider>
