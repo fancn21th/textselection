@@ -18,9 +18,9 @@ function App() {
       <h1 className="font-bold">Text Range Selection</h1>
       <hr className="my-2" />
       <div className="relative">
-        <TextRender></TextRender>
-        <BackgroundRender></BackgroundRender>
         <DragnDropRender></DragnDropRender>
+        <BackgroundRender></BackgroundRender>
+        <TextRender></TextRender>
       </div>
     </div>
   );

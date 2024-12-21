@@ -49,6 +49,7 @@ export function CursorGhost({ index }: { index: number }) {
   return (
     <span
       className={clsx(
+        "text-transparent",
         "font-extrabold absolute",
         predefinedColors[index % predefinedColors.length]
       )}
@@ -81,7 +82,10 @@ function Char({
   );
 
   return (
-    <span ref={drop} className={clsx(isOver && "bg-gray-200")}>
+    <span
+      ref={drop}
+      className={clsx("text-transparent", isOver && "bg-gray-200")}
+    >
       {children}
     </span>
   );
@@ -124,7 +128,8 @@ function DragNDrop() {
   }, []);
 
   return (
-    <div className="absolute">
+    <div className="absolute z-30">
+      {/* dnd layer */}
       {chars.map((char, index) => {
         if (char.isCursor && char.pos) {
           return <Cursor key={index} pos={char.pos}></Cursor>;

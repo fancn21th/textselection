@@ -61,7 +61,8 @@ function Background() {
 
   return (
     <>
-      <div className="absolute">
+      <div className="absolute z-10">
+        {/* bg layer */}
         {parts.map((part, index) => {
           if ("text" in part) {
             return (

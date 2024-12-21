@@ -6,7 +6,12 @@ function Text() {
   const { text } = useContext<TextRangeSelectionContextType>(
     TextRangeSelectionContext
   );
-  return <div className="absolute">{text}</div>;
+  return (
+    <div className="absolute z-20">
+      {/* text layer */}
+      {text}
+    </div>
+  );
 }
 
 export default Text;
