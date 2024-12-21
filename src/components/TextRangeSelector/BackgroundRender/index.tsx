@@ -2,11 +2,11 @@ import clsx from "clsx";
 import { Fragment, useContext } from "react";
 import { CursorGhost } from "../DragnDropRender";
 import { createPortal } from "react-dom";
-import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
+import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
 import type {
   TextRangeSelectionContextType,
   CursorPosition,
-} from "../../context/TextRangeSelectionContext";
+} from "../context/TextRangeSelectionContext";
 
 type Part = {
   text: string; // 段落内容

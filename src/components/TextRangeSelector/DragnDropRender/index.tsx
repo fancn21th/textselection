@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { useContext } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
+import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
 import type {
   OriginCursor,
   TextRangeSelectionContextType,
   CursorPosition,
   CharType,
-} from "../../context/TextRangeSelectionContext";
+} from "../context/TextRangeSelectionContext";
 
 const predefinedColors = [
   "text-red-500",
