@@ -1,5 +1,8 @@
 import clsx from "clsx";
+import { useContext } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { TextRangeSelectionContext } from "../../context/TextRangeSelectionContext";
+import type { TextRangeSelectionContextType } from "../../context/TextRangeSelectionContext";
 
 const predefinedColors = [
   "text-red-500",
@@ -26,7 +29,7 @@ function Cursor({ pos }: { pos: CursorPosition }) {
   return (
     <span
       className={clsx(
-        "font-extrabold",
+        "font-extrabold absolute",
         predefinedColors[pos.origin % predefinedColors.length],
         isDragging && "opacity-50"
       )}
@@ -92,14 +95,9 @@ function Char({
   );
 }
 
-function DragNDrop({
-  text,
-  setCursors,
-}: {
-  text: string;
-  setCursors: React.Dispatch<React.SetStateAction<CursorPosition[]>>;
-}) {
-  let pos = 0;
+function DragNDrop() {
+  const { sortedPositions, text, setCursors } =
+    useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setCursors((prevCursors) => {
@@ -117,6 +115,8 @@ function DragNDrop({
     });
   };
 
+  let pos = 0;
+
   const chars = text.split(splitter).reduce<CharType[]>((acc, char, index) => {
     const append: CharType[] = [{ char, index, isCursor: false, pos: null }];
     if (pos < sortedPositions.length && sortedPositions[pos].pos === index) {
@@ -132,7 +132,7 @@ function DragNDrop({
   }, []);
 
   return (
-    <>
+    <div className="absolute">
       {chars.map((char, index) => {
         if (char.isCursor && char.pos) {
           return <Cursor key={index} pos={char.pos}></Cursor>;
@@ -143,7 +143,7 @@ function DragNDrop({
           </Char>
         );
       })}
-    </>
+    </div>
   );
 }
 
