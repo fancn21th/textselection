@@ -25,16 +25,16 @@ export type ResolvedCursor = {
 };
 
 export type CursorPosition = {
-  pos: number;
-  type: string;
-  origin: number;
+  pos: number; // 坐标
+  type: string; // 起点或者是终点
+  origin: number; // 原始索引
 };
 
 export type CharType = {
   isCursor: boolean;
   char: string;
   pos: CursorPosition | null;
-  index: number;
+  index: number; // 坐标
 };
 
 // Types for context value
@@ -45,6 +45,8 @@ export type TextRangeSelectionContextType = {
   text: string;
   content: string[];
   sortedPositions: CursorPosition[];
+  isDragging: boolean;
+  setIsDragging: (isDragging: boolean) => void;
 };
 
 // 创建 Context
@@ -70,9 +72,9 @@ export const TextRangeSelectionProvider = ({
   ]);
 
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
-
   const [text, _setText] = useState("");
   const [content, setContent] = useState<string[]>(text.split(splitter));
+  const [isDragging, setIsDragging] = useState(false);
 
   const start = useRef(0);
   const end = useRef(0);
@@ -205,6 +207,8 @@ export const TextRangeSelectionProvider = ({
 
   // derived state 以下都是派生状态
 
+  // console.log({ cursors });
+
   // Cursor 坐标
   const cursorPositions = cursors.reduce<CursorPosition[]>(
     (acc, cursor, index) => {
@@ -239,16 +243,20 @@ export const TextRangeSelectionProvider = ({
         content,
         sortedPositions,
         setCursors,
+        isDragging,
+        setIsDragging,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="fixed bottom-1 right-1 p-4 bg-white border border-gray-500 rounded">
+        <div className="fixed top-1 right-1 p-4 bg-white border border-gray-500 rounded">
           字符长度: <p>{text.length}</p>
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
-          背景计算耗时:{" "}
+          背景计算耗时:
           <p>{`Execution time: ${end.current - start.current} ms`}</p>
+          正在拖拽:
+          <p>{isDragging ? "是" : "否"}</p>
         </div>,
         document.body
       )}

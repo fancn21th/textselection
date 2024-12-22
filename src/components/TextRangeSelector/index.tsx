@@ -13,6 +13,7 @@ function Render({ text }: { text: string }) {
   useEffect(() => {
     setText(text);
   }, []);
+
   return (
     <div className="relative w-[800px]">
       <DragnDropRender></DragnDropRender>

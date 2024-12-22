@@ -58,9 +58,10 @@ function Background() {
     return [...acc, ...append];
   }, []);
 
+  // console.log({ parts });
+
   return (
-    <div className="absolute z-10">
-      {/* bg layer */}
+    <div className="absolute z-10 bglayer">
       {parts.map((part, index) => {
         if ("text" in part) {
           return (
@@ -78,7 +79,7 @@ function Background() {
             </Fragment>
           );
         }
-        return <CursorGhost key={index} index={part.origin}></CursorGhost>;
+        return <CursorGhost key={index} index={index} pos={part}></CursorGhost>;
       })}
     </div>
   );

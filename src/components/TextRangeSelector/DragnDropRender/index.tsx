@@ -1,12 +1,11 @@
 import clsx from "clsx";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
 import type {
   OriginCursor,
   TextRangeSelectionContextType,
   CursorPosition,
-  CharType,
 } from "../context/TextRangeSelectionContext";
 
 const predefinedColors = [
@@ -20,7 +19,11 @@ const predefinedColors = [
 
 const splitter = "";
 
-function Cursor({ pos }: { pos: CursorPosition }) {
+export function CursorGhost({ pos }: { index: number; pos: CursorPosition }) {
+  const { setIsDragging } = useContext<TextRangeSelectionContextType>(
+    TextRangeSelectionContext
+  );
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
     item: () => {
@@ -31,28 +34,20 @@ function Cursor({ pos }: { pos: CursorPosition }) {
     }),
   }));
 
+  useEffect(() => {
+    setIsDragging(isDragging);
+  }, [isDragging]);
+
   return (
     <span
       className={clsx(
-        "font-extrabold absolute",
+        // "text-transparent",
+        "font-extrabold",
+        "absolute z-50 cursor-move",
         predefinedColors[pos.origin % predefinedColors.length],
         isDragging && "opacity-50"
       )}
       ref={drag}
-    >
-      |
-    </span>
-  );
-}
-
-export function CursorGhost({ index }: { index: number }) {
-  return (
-    <span
-      className={clsx(
-        "text-transparent",
-        "font-extrabold absolute",
-        predefinedColors[index % predefinedColors.length]
-      )}
     >
       |
     </span>
@@ -82,14 +77,17 @@ function Char({
   );
 
   return (
-    <span ref={drop} className={clsx("", isOver && "bg-gray-200")}>
+    <span
+      ref={drop}
+      className={clsx("text-transparent", isOver && "bg-gray-200")}
+    >
       {children}
     </span>
   );
 }
 
 function DragNDrop() {
-  const { sortedPositions, text, setCursors } =
+  const { text, setCursors, isDragging } =
     useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
@@ -108,35 +106,18 @@ function DragNDrop() {
     });
   };
 
-  let pos = 0;
-
-  const chars = text.split(splitter).reduce<CharType[]>((acc, char, index) => {
-    const append: CharType[] = [{ char, index, isCursor: false, pos: null }];
-    if (pos < sortedPositions.length && sortedPositions[pos].pos === index) {
-      append.unshift({
-        char: "",
-        index,
-        isCursor: true,
-        pos: sortedPositions[pos],
-      });
-      pos++;
-    }
-    return [...acc, ...append];
-  }, []);
-
   return (
-    <div className="absolute z-30">
-      {/* dnd layer */}
-      {chars.map((char, index) => {
-        if (char.isCursor && char.pos) {
-          return <Cursor key={index} pos={char.pos}></Cursor>;
-        }
-        return (
-          <Char key={index} index={char.index} onDrop={onDrop}>
-            {char.char}
-          </Char>
-        );
-      })}
+    <div
+      className={clsx(
+        "absolute z-30 dndLayer",
+        !isDragging && "pointer-events-none"
+      )}
+    >
+      {text.split(splitter).map((char, index) => (
+        <Char key={index} index={index} onDrop={onDrop}>
+          {char}
+        </Char>
+      ))}
     </div>
   );
 }
