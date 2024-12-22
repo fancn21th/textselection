@@ -109,7 +109,8 @@ function DragNDrop() {
   return (
     <div
       className={clsx(
-        "absolute z-30 dndLayer",
+        "absolute",
+        "z-30 dndLayer",
         !isDragging && "pointer-events-none"
       )}
     >

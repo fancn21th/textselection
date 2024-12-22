@@ -61,7 +61,7 @@ function Background() {
   // console.log({ parts });
 
   return (
-    <div className="absolute z-10 bglayer">
+    <div className={clsx("absolute", "z-10 bglayer")}>
       {parts.map((part, index) => {
         if ("text" in part) {
           return (

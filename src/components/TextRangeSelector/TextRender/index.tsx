@@ -10,7 +10,8 @@ function Text() {
   return (
     <div
       className={clsx(
-        "absolute z-20 textLayer ",
+        "absolute",
+        "z-20 textLayer ",
         !isDragging && "pointer-events-none"
       )}
     >
