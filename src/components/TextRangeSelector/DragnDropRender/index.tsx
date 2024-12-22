@@ -82,10 +82,7 @@ function Char({
   );
 
   return (
-    <span
-      ref={drop}
-      className={clsx("text-transparent", isOver && "bg-gray-200")}
-    >
+    <span ref={drop} className={clsx("", isOver && "bg-gray-200")}>
       {children}
     </span>
   );

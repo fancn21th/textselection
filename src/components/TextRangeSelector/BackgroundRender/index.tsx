@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { Fragment, useContext } from "react";
 import { CursorGhost } from "../DragnDropRender";
-import { createPortal } from "react-dom";
 import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
 import type {
   TextRangeSelectionContextType,
@@ -20,14 +19,8 @@ type Part = {
 type Combo = Part | CursorPosition;
 
 function Background() {
-  const {
-    cursors,
-    resolvedCursors,
-    content,
-    sortedPositions,
-    executionTime,
-    text,
-  } = useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
+  const { resolvedCursors, content, sortedPositions } =
+    useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   let pos = 0;
   const parts = resolvedCursors.reduce<Combo[]>((acc, cursor) => {
@@ -66,39 +59,28 @@ function Background() {
   }, []);
 
   return (
-    <>
-      <div className="absolute z-10">
-        {/* bg layer */}
-        {parts.map((part, index) => {
-          if ("text" in part) {
-            return (
-              <Fragment key={index}>
-                <span
-                  className={clsx(
-                    "text-transparent",
-                    !part.overLapped && part.isEven && "bg-red-300",
-                    !part.overLapped && part.isOdd && "bg-green-300",
-                    part.overLapped && "bg-gray-300"
-                  )}
-                >
-                  {part.text}
-                </span>
-              </Fragment>
-            );
-          }
-          return <CursorGhost key={index} index={part.origin}></CursorGhost>;
-        })}
-      </div>
-
-      {createPortal(
-        <div className="fixed bottom-1 right-1 p-4 bg-white border border-gray-500 rounded">
-          字符长度: <p>{text.length}</p>
-          分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
-          背景计算耗时: <p>{`Execution time: ${executionTime} ms`}</p>
-        </div>,
-        document.body
-      )}
-    </>
+    <div className="absolute z-10">
+      {/* bg layer */}
+      {parts.map((part, index) => {
+        if ("text" in part) {
+          return (
+            <Fragment key={index}>
+              <span
+                className={clsx(
+                  "text-transparent",
+                  !part.overLapped && part.isEven && "bg-red-300",
+                  !part.overLapped && part.isOdd && "bg-green-300",
+                  part.overLapped && "bg-gray-300"
+                )}
+              >
+                {part.text}
+              </span>
+            </Fragment>
+          );
+        }
+        return <CursorGhost key={index} index={part.origin}></CursorGhost>;
+      })}
+    </div>
   );
 }
 

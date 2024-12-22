@@ -39,14 +39,12 @@ export type CharType = {
 
 // Types for context value
 export type TextRangeSelectionContextType = {
-  cursors: OriginCursor[];
   setCursors: (cursors: OriginCursor[]) => void;
   resolvedCursors: ResolvedCursor[];
   setText: (text: string) => void;
   text: string;
   content: string[];
   sortedPositions: CursorPosition[];
-  executionTime: number;
 };
 
 // 创建 Context
@@ -57,6 +55,7 @@ export const TextRangeSelectionContext =
 
 // 创建 Provider 组件
 import { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 export const TextRangeSelectionProvider = ({
   children,
@@ -73,6 +72,7 @@ export const TextRangeSelectionProvider = ({
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
 
   const [text, _setText] = useState("");
+  const [content, setContent] = useState<string[]>(text.split(splitter));
 
   const start = useRef(0);
   const end = useRef(0);
@@ -223,28 +223,35 @@ export const TextRangeSelectionProvider = ({
 
   // console.log({ sortedPositions });
 
-  end.current = performance.now();
-
   const setText = (text: string) => {
     _setText(text);
+    setContent(text.split(splitter));
   };
 
-  const content = text.split(splitter);
+  end.current = performance.now();
 
   return (
     <TextRangeSelectionContext.Provider
       value={{
-        cursors,
         resolvedCursors,
         setText,
         text,
         content,
         sortedPositions,
-        executionTime: end.current - start.current,
         setCursors,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+      {/* debugger */}
+      {createPortal(
+        <div className="fixed bottom-1 right-1 p-4 bg-white border border-gray-500 rounded">
+          字符长度: <p>{text.length}</p>
+          分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
+          背景计算耗时:{" "}
+          <p>{`Execution time: ${end.current - start.current} ms`}</p>
+        </div>,
+        document.body
+      )}
     </TextRangeSelectionContext.Provider>
   );
 };
