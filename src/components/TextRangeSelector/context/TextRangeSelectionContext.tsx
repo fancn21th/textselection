@@ -64,7 +64,7 @@ export const TextRangeSelectionProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [cursors, setCursors] = useState<OriginCursor[]>([
+  const [cursors, _setCursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },
     // { s: 400, e: 600 },
@@ -232,18 +232,22 @@ export const TextRangeSelectionProvider = ({
     setContent(text.split(splitter));
   };
 
+  const setCursors = (cursors: OriginCursor[]) => {
+    _setCursors(cursors);
+  };
+
   end.current = performance.now();
 
   return (
     <TextRangeSelectionContext.Provider
       value={{
         resolvedCursors,
-        setText,
         text,
         content,
         sortedPositions,
-        setCursors,
         isDragging,
+        setCursors,
+        setText,
         setIsDragging,
       }}
     >
