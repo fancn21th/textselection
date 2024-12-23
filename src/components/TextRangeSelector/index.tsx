@@ -1,13 +1,10 @@
-import { useContext, useEffect } from "react";
-import {
-  TextRangeSelectionContext,
-  TextRangeSelectionProvider,
-} from "./context/TextRangeSelectionContext";
+import { memo, useContext, useEffect } from "react";
+import { TextRangeSelectionContext, TextRangeSelectionProvider } from "./context/TextRangeSelectionContext";
 import TextRender from "./TextRender";
 import BackgroundRender from "./BackgroundRender";
 import DragnDropRender from "./DragnDropRender";
 
-function Render({ text }: { text: string }) {
+const Render = memo(({ text }: { text: string }) => {
   const { setText } = useContext(TextRangeSelectionContext);
 
   useEffect(() => {
@@ -15,20 +12,23 @@ function Render({ text }: { text: string }) {
   }, []);
 
   return (
-    <div className="relative w-[800px]">
-      <DragnDropRender></DragnDropRender>
+    <div className="relative w-full">
+      {/* z-10 */}
       <BackgroundRender></BackgroundRender>
+      {/* z-20 */}
       <TextRender></TextRender>
+      {/* z-30 */}
+      <DragnDropRender></DragnDropRender>
     </div>
   );
-}
+});
 
-function TextRangeSelector({ text }: { text: string }) {
+const TextRangeSelector = ({ text }: { text: string }) => {
   return (
     <TextRangeSelectionProvider>
       <Render text={text}></Render>
     </TextRangeSelectionProvider>
   );
-}
+};
 
-export default TextRangeSelector;
+export default memo(TextRangeSelector);

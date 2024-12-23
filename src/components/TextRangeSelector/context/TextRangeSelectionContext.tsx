@@ -1,6 +1,6 @@
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, memo, useCallback, useEffect, useRef, useState } from "react";
 
 // Constants
 const splitter = "";
@@ -50,20 +50,14 @@ export type TextRangeSelectionContextType = {
 };
 
 // 创建 Context
-export const TextRangeSelectionContext =
-  createContext<TextRangeSelectionContextType>(
-    {} as TextRangeSelectionContextType
-  );
+export const TextRangeSelectionContext = createContext<TextRangeSelectionContextType>({} as TextRangeSelectionContextType);
 
 // 创建 Provider 组件
 import { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-export const TextRangeSelectionProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+//-----------------------------------------组件开始--------------------------------------------
+export const TextRangeSelectionProvider = memo(({ children }: { children: ReactNode }) => {
   const [cursors, _setCursors] = useState<OriginCursor[]>([
     { s: 100, e: 300 },
     { s: 200, e: 500 },
@@ -210,16 +204,9 @@ export const TextRangeSelectionProvider = ({
   // console.log({ cursors });
 
   // Cursor 坐标
-  const cursorPositions = cursors.reduce<CursorPosition[]>(
-    (acc, cursor, index) => {
-      return [
-        ...acc,
-        { pos: cursor.s, type: "s", origin: index },
-        { pos: cursor.e, type: "e", origin: index },
-      ];
-    },
-    []
-  );
+  const cursorPositions = cursors.reduce<CursorPosition[]>((acc, cursor, index) => {
+    return [...acc, { pos: cursor.s, type: "s", origin: index }, { pos: cursor.e, type: "e", origin: index }];
+  }, []);
 
   // console.log({ cursorPositions });
 
@@ -227,14 +214,14 @@ export const TextRangeSelectionProvider = ({
 
   // console.log({ sortedPositions });
 
-  const setText = (text: string) => {
+  const setText = useCallback((text: string) => {
     _setText(text);
     setContent(text.split(splitter));
-  };
+  }, []);
 
-  const setCursors = (cursors: OriginCursor[]) => {
+  const setCursors = useCallback((cursors: OriginCursor[]) => {
     _setCursors(cursors);
-  };
+  }, []);
 
   end.current = performance.now();
 
@@ -254,7 +241,7 @@ export const TextRangeSelectionProvider = ({
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="fixed top-1 right-1 p-4 bg-white border border-gray-500 rounded">
+        <div className="fixed bottom-1 right-1 p-4 bg-white border border-gray-500 rounded">
           字符长度: <p>{text.length}</p>
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
           背景计算耗时:
@@ -266,4 +253,4 @@ export const TextRangeSelectionProvider = ({
       )}
     </TextRangeSelectionContext.Provider>
   );
-};
+});
