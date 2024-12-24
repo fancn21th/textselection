@@ -56,7 +56,7 @@ function Text() {
             <div style={style}>
               {/* text layer */}
               <div className="">
-                <span className="text-transparent">{text}</span>
+                <span className={clsx()}>{text}</span>
               </div>
               {/* background layer */}
               {parts && (
@@ -67,7 +67,11 @@ function Text() {
                     return (
                       <span
                         key={_index}
-                        className={clsx(part.isEven && "bg-red-300")}
+                        className={clsx(
+                          part.isEven && !part.isFill && "bg-red-300",
+                          part.isOdd && !part.isFill && "bg-green-300",
+                          part.isFill && "bg-transparent"
+                        )}
                       >
                         {text.slice(_start, _end)}
                       </span>

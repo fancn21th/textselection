@@ -17,6 +17,12 @@ export type MarkedCursor = {
   headOverlapped: number;
 };
 
+export type ResolvedLine = {
+  s: number;
+  e: number;
+  line: number;
+};
+
 export type ResolvedCursor = {
   s: number;
   e: number;
@@ -25,6 +31,7 @@ export type ResolvedCursor = {
   isGap?: boolean;
   isEven?: boolean;
   isOdd?: boolean;
+  isFill?: boolean;
 };
 
 export type CursorPosition = {
@@ -64,6 +71,53 @@ export const TextRangeSelectionContext =
     {} as TextRangeSelectionContextType
   );
 
+// utils
+function splitRangeIntoChunksWithLines(range, chunkSize) {
+  const result = [];
+  const { s: start, e: end } = range;
+
+  // Start of the chunk sequence
+  let currentStart = Math.floor(start / chunkSize) * chunkSize;
+  let currentEnd = currentStart + chunkSize;
+
+  // Ensure the first chunk fills up to the start
+  if (currentStart < start) {
+    result.push({
+      ...range,
+      s: currentStart,
+      e: start,
+      line: Math.floor(currentStart / chunkSize),
+      isFill: true,
+    });
+    currentStart = start;
+  }
+
+  // Main chunks
+  while (currentStart < end) {
+    currentEnd = Math.min(currentStart + chunkSize, end);
+    result.push({
+      ...range,
+      s: currentStart,
+      e: currentEnd,
+      line: Math.floor(currentStart / chunkSize),
+    });
+    currentStart = currentEnd;
+  }
+
+  // Ensure the last chunk fills up after the end
+  if (currentStart % chunkSize !== 0) {
+    result.push({
+      ...range,
+      s: currentStart,
+      e: Math.ceil(currentStart / chunkSize) * chunkSize,
+      line: Math.floor(currentStart / chunkSize),
+      isFill: true,
+    });
+  }
+
+  return result;
+}
+
 // 创建 Provider 组件
 import { ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -74,17 +128,17 @@ export const TextRangeSelectionProvider = ({
   children: ReactNode;
 }) => {
   const [cursors, _setCursors] = useState<OriginCursor[]>([
-    { s: 0, e: 100 },
-    // { s: 200, e: 500 },
-    // { s: 400, e: 600 },
+    { s: 1, e: 25 },
+    { s: 51, e: 99 },
+    { s: 2000, e: 2100 },
     // { s: 600, e: 700 },
   ]);
 
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
   const [text, _setText] = useState("");
-  const [content, setContent] = useState<string[]>(text.split(splitter));
+  const [content, _setContent] = useState<string[]>(text.split(splitter));
   const [isDragging, setIsDragging] = useState(false);
-  const [visibleLines, setVisibleLines] = useState({
+  const [visibleLines, _setVisibleLines] = useState({
     start: 0,
     end: 0,
   });
@@ -201,21 +255,28 @@ export const TextRangeSelectionProvider = ({
 
     // console.log({ deduped });
 
+    const oddEven = deduped.map((cursor, index) => ({
+      ...cursor,
+      isEven: index % 2 === 0,
+      isOdd: index % 2 === 1,
+    }));
+
     // 填充空隙
+    // TODO: 可以去掉
     const gapFilled = [];
     let lastEnd = 0;
-    for (const { s, e, index, overLapped } of deduped) {
+    for (const { s, e, index, overLapped, isEven, isOdd } of oddEven) {
       if (s > lastEnd) {
         gapFilled.push({ s: lastEnd, e: s, isGap: true });
       }
-      gapFilled.push({ s, e, index, overLapped });
+      gapFilled.push({ s, e, index, overLapped, isEven, isOdd });
       lastEnd = e;
     }
     if (lastEnd < content.length) {
       gapFilled.push({ s: lastEnd, e: content.length, isGap: true });
     }
 
-    console.log({ gapFilled });
+    // console.log({ gapFilled });
 
     setResolvedCursors(gapFilled);
 
@@ -229,43 +290,39 @@ export const TextRangeSelectionProvider = ({
     const end = (visibleLines.end + 1) * chunkSize;
 
     // 过滤掉不在可视区域的 cursor
-    const slimed = resolvedCursors.filter((cursor) => {
-      return cursor.s < end && cursor.e > start;
-    });
+    const slimed = resolvedCursors
+      .filter((cursor) => {
+        return cursor.s < end && cursor.e > start;
+      })
+      .filter((cursor) => {
+        // TODO: removed
+        return cursor.isGap !== true;
+      });
 
-    const linesPart = slimed.reduce<LinesPart>((acc, cursor, index) => {
-      // 每 chunkSize 个字符为一行
-      const length = cursor.e - cursor.s;
-      const startLineIndex = Math.floor(cursor.s / chunkSize);
-      const linesCount = Math.ceil(length / chunkSize);
-      // const tail = length % chunkSize;
+    console.log({ slimed });
 
-      const lines = new Array(linesCount).fill(0).reduce((_acc, _, _index) => {
-        return {
-          ..._acc,
-          [startLineIndex + _index]: [
-            ...(_acc[startLineIndex + _index] || []),
-            {
-              s: cursor.s + _index * chunkSize,
-              e: cursor.s + (_index + 1) * chunkSize,
-              overLapped: cursor.overLapped,
-              isGap: !!cursor.isGap,
-              isEven: cursor.index! % 2 === 0,
-              isOdd: cursor.index! % 2 === 1,
-            },
-          ],
-        };
-      }, {});
+    const lines = slimed.reduce<ResolvedLine[]>((acc, cursor) => {
+      const chunks = splitRangeIntoChunksWithLines(cursor, chunkSize);
+      return [...acc, ...chunks];
+    }, []);
 
-      return {
-        ...acc,
-        ...lines,
-      };
+    console.log({ lines });
+
+    const linesPart = lines.reduce<LinesPart>((acc, line) => {
+      const { line: lineNumber } = line;
+      if (!acc[lineNumber]) {
+        acc[lineNumber] = [];
+      }
+      acc[lineNumber].push({
+        ...line,
+      });
+      return acc;
     }, {});
 
     console.log({ linesPart });
 
     setVisibleLinesPart(linesPart);
+
     return () => {};
   }, [visibleLines, resolvedCursors]);
 
@@ -291,11 +348,11 @@ export const TextRangeSelectionProvider = ({
     .slice()
     .sort((a, b) => a.pos - b.pos);
 
-  console.log({ sortedCursorPositions });
+  // console.log({ sortedCursorPositions });
 
   const setText = (text: string) => {
     _setText(text);
-    setContent(text.split(splitter));
+    _setContent(text.split(splitter));
   };
 
   const setCursors = (cursors: OriginCursor[]) => {
@@ -303,7 +360,7 @@ export const TextRangeSelectionProvider = ({
   };
 
   const setLineRange = (start: number, end: number) => {
-    setVisibleLines({ start, end });
+    _setVisibleLines({ start, end });
   };
 
   end.current = performance.now();

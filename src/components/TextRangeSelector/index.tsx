@@ -4,8 +4,8 @@ import {
   TextRangeSelectionProvider,
 } from "./context/TextRangeSelectionContext";
 import TextRender from "./TextRender";
-import BackgroundRender from "./BackgroundRender";
-import DragnDropRender from "./DragnDropRender";
+// import BackgroundRender from "./BackgroundRender";
+// import DragnDropRender from "./DragnDropRender";
 
 function Render({ text }: { text: string }) {
   const { setText } = useContext(TextRangeSelectionContext);
