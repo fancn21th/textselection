@@ -5,6 +5,8 @@ import { CursorPosition } from "../../context/TextRangeSelectionContext";
 
 const style = {
   contentVisibility: "auto",
+  contain: "content",
+  willChange: "transform",
 };
 
 const Char = memo(({ children, index, onDrop }: { children: React.ReactNode; index: number; onDrop: (pos: CursorPosition, newPos: number) => void }) => {
@@ -22,7 +24,8 @@ const Char = memo(({ children, index, onDrop }: { children: React.ReactNode; ind
   );
 
   return (
-    <span ref={drop} style={{...style}} className={clsx("text-transparent", isOver && "bg-gray-200")}>
+    // "text-transparent",
+    <span ref={drop} style={{ ...style }} className={clsx(isOver && "bg-gray-200")}>
       {children}
     </span>
   );

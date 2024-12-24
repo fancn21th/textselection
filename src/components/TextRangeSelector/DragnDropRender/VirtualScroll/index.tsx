@@ -1,14 +1,14 @@
 import { memo, useEffect, useMemo, useRef, useState, Fragment } from "react";
 import Char from "../Char";
 
-interface VirtualizedCharsProps {
+interface VirtualScrollProps {
   text: string;
   pageSize?: number;
   onDrop: (index: number) => void;
   containerSelector?: string; // 可选的滚动容器选择器
 }
 
-const VirtualizedChars: React.FC<VirtualizedCharsProps> = ({ text, pageSize = 3000, onDrop, containerSelector }) => {
+const VirtualScroll: React.FC<VirtualScrollProps> = ({ text, pageSize = 3000, onDrop, containerSelector }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
 
@@ -16,7 +16,6 @@ const VirtualizedChars: React.FC<VirtualizedCharsProps> = ({ text, pageSize = 30
   const startIndex = 0;
   const endIndex = Math.min(currentPage * pageSize, text.length);
 
-  // 将字符分组
   const charGroups = useMemo(() => {
     const groups: string[][] = [];
     for (let i = startIndex; i < endIndex; i += pageSize) {
@@ -25,7 +24,6 @@ const VirtualizedChars: React.FC<VirtualizedCharsProps> = ({ text, pageSize = 30
     return groups;
   }, [text, startIndex, endIndex, pageSize]);
 
-  // 简化加载监听逻辑
   useEffect(() => {
     const loadingElement = lastElementRef.current;
     if (!loadingElement) return;
@@ -51,22 +49,6 @@ const VirtualizedChars: React.FC<VirtualizedCharsProps> = ({ text, pageSize = 30
   return (
     <div style={{ height: "100%", minHeight: "100px" }}>
       {charGroups.map((group, groupIndex) => (
-        // <div
-        //   key={groupIndex}
-        //   style={{
-        //     minHeight: "20px",
-        //     contentVisibility: "auto",
-        //   }}
-        // >
-        //   {group.map((char, charIndex) => {
-        //     const absoluteIndex = groupIndex * pageSize + charIndex;
-        //     return (
-        //       <Char key={absoluteIndex} index={absoluteIndex} onDrop={onDrop}>
-        //         {char}
-        //       </Char>
-        //     );
-        //   })}
-        // </div>
         <Fragment key={groupIndex}>
           {group.map((char, charIndex) => {
             const absoluteIndex = groupIndex * pageSize + charIndex;
@@ -80,19 +62,12 @@ const VirtualizedChars: React.FC<VirtualizedCharsProps> = ({ text, pageSize = 30
       ))}
 
       {currentPage < totalPages && (
-        <div
-          ref={lastElementRef}
-          style={{
-            height: "30px",
-            padding: "5px",
-            textAlign: "center",
-          }}
-        >
-          加载中...
+        <div ref={lastElementRef} className="h-10 w-full bg-red-500 text-center">
+          加载中
         </div>
       )}
     </div>
   );
 };
 
-export default memo(VirtualizedChars);
+export default memo(VirtualScroll);

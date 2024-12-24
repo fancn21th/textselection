@@ -3,7 +3,7 @@ import { memo, useCallback, useContext, useEffect } from "react";
 import { useDrag } from "react-dnd";
 import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
 import Char from "./Char";
-import ListPoi from "./ListPoi";
+import VirtualScroll from "./VirtualScroll";
 import type { OriginCursor, TextRangeSelectionContextType, CursorPosition } from "../context/TextRangeSelectionContext";
 const predefinedColors = ["text-red-500", "text-blue-500", "text-green-500", "text-yellow-500", "text-purple-500", "text-pink-500"];
 
@@ -69,7 +69,7 @@ function DragNDrop() {
           {char}
         </Char>
       ))} */}
-      <ListPoi text={text} pageSize={5000} onDrop={onDrop} containerSelector="#outer-scroll-container" />
+      <VirtualScroll text={text} pageSize={3000} onDrop={onDrop} />
     </div>
   );
 }

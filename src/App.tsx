@@ -6,7 +6,7 @@ function App() {
     <div className="p-10">
       <h1 className="font-bold">Text Range Selection</h1>
       <hr className="my-2" />
-      <div className="h-[500px] overflow-auto" id="outer-scroll-container">
+      <div className="h-[500px]">
         <TextRangeSelector text={text} />
       </div>
     </div>

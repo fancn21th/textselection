@@ -88,8 +88,9 @@ function Background() {
   }, [resolvedCursors, joinedContent, sortedPositions]);
 
   return (
-    <div className={clsx("absolute", "z-10 bglayer")}>
+    <div className={clsx("absolute", "z-10 bglayer max-h-full")}>
       {parts.map((part, index) => {
+        if (index === parts.length - 1 && "text" in part) return null;
         if ("text" in part) {
           return (
             <span key={index} className={clsx("text-transparent", !part.overLapped && part.isEven && "bg-red-300", !part.overLapped && part.isOdd && "bg-green-300", part.overLapped && "bg-gray-300")}>
