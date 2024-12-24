@@ -254,7 +254,7 @@ export const TextRangeSelectionProvider = ({
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="fixed top-1 right-1 p-4 bg-white border border-gray-500 rounded">
+        <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
           字符长度: <p>{text.length}</p>
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
           背景计算耗时:

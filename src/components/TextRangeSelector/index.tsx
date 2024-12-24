@@ -15,9 +15,9 @@ function Render({ text }: { text: string }) {
   }, []);
 
   return (
-    <div className="relative w-[800px]">
-      <DragnDropRender></DragnDropRender>
-      <BackgroundRender></BackgroundRender>
+    <div className="relative w-[800px] h-[600px] border border-red-500 overflow-y-scroll">
+      {/* <DragnDropRender></DragnDropRender>
+      <BackgroundRender></BackgroundRender> */}
       <TextRender></TextRender>
     </div>
   );
