@@ -19,7 +19,7 @@ type Part = {
 type Combo = Part | CursorPosition;
 
 function Background() {
-  const { resolvedCursors, content, sortedPositions } =
+  const { resolvedCursors, content, sortedCursorPositions } =
     useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   let pos = 0;
@@ -35,22 +35,22 @@ function Background() {
         isOdd: cursor.index! % 2 === 1,
       },
     ];
-    if (pos < sortedPositions.length) {
+    if (pos < sortedCursorPositions.length) {
       if (
-        sortedPositions[pos].type === "s" &&
-        cursor.s === sortedPositions[pos].pos
+        sortedCursorPositions[pos].type === "s" &&
+        cursor.s === sortedCursorPositions[pos].pos
       ) {
         append.unshift({
-          ...sortedPositions[pos],
+          ...sortedCursorPositions[pos],
         });
         pos++;
       }
       if (
-        sortedPositions[pos].type === "e" &&
-        cursor.e === sortedPositions[pos].pos
+        sortedCursorPositions[pos].type === "e" &&
+        cursor.e === sortedCursorPositions[pos].pos
       ) {
         append.push({
-          ...sortedPositions[pos],
+          ...sortedCursorPositions[pos],
         });
         pos++;
       }

@@ -1,13 +1,16 @@
 import { useContext, useMemo, useState } from "react";
-import { TextRangeSelectionContext } from "../context/TextRangeSelectionContext";
+import {
+  TextRangeSelectionContext,
+  chunkSize,
+} from "../context/TextRangeSelectionContext";
 import type { TextRangeSelectionContextType } from "../context/TextRangeSelectionContext";
 import { FixedSizeList as List } from "react-window";
 import { createPortal } from "react-dom";
+import clsx from "clsx";
 
 function Text() {
-  const { text } = useContext<TextRangeSelectionContextType>(
-    TextRangeSelectionContext
-  );
+  const { text, setLineRange, visibleLinesPart } =
+    useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
 
   // 跟踪当前可视区域的 chunk 索引
   const [visibleRange, setVisibleRange] = useState({
@@ -17,7 +20,6 @@ function Text() {
 
   // 分块文本
   const chunks = useMemo(() => {
-    const chunkSize = 100; // 每块的字符数
     const result = [];
     for (let i = 0; i < text.length; i += chunkSize) {
       result.push(text.slice(i, i + chunkSize));
@@ -40,17 +42,42 @@ function Text() {
           visibleStopIndex: number;
         }) => {
           // 更新当前可视区域
+          setLineRange(visibleStartIndex, visibleStopIndex);
           setVisibleRange({
             startIndex: visibleStartIndex,
             endIndex: visibleStopIndex,
           });
         }}
       >
-        {({ index, style }: { index: number; style: React.CSSProperties }) => (
-          <div style={style}>
-            <span>{chunks[index]}</span>
-          </div>
-        )}
+        {({ index, style }: { index: number; style: React.CSSProperties }) => {
+          const text = chunks[index];
+          const parts = visibleLinesPart[index];
+          return (
+            <div style={style}>
+              {/* text layer */}
+              <div className="">
+                <span className="text-transparent">{text}</span>
+              </div>
+              {/* background layer */}
+              {parts && (
+                <div className={clsx("absolute left-0 top-0")}>
+                  {parts.map((part, _index) => {
+                    const _start = part.s - index * chunkSize;
+                    const _end = part.e - index * chunkSize;
+                    return (
+                      <span
+                        key={_index}
+                        className={clsx(part.isEven && "bg-red-300")}
+                      >
+                        {text.slice(_start, _end)}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        }}
       </List>
       {/* debugger */}
       {createPortal(
