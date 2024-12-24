@@ -85,7 +85,7 @@ function Text() {
       </List>
       {/* debugger */}
       {createPortal(
-        <div className="absolute top-0 left-0 bg-gray-100 p-2 text-sm">
+        <div className="absolute right-0 bottom-0 bg-gray-100 p-2 text-sm">
           <p>Visible Range:</p>
           <p>Start: {visibleRange.startIndex}</p>
           <p>End: {visibleRange.endIndex}</p>
