@@ -91,6 +91,7 @@ export const TextRangeSelectionProvider = ({
   const [cursors, _setCursors] = useState<OriginCursor[]>([
     { s: 2, e: 25 },
     { s: 15, e: 28 },
+    { s: 50, e: 120 },
     { s: 2000, e: 2700 },
     { s: 2550, e: 3000 },
   ]);
@@ -249,7 +250,7 @@ export const TextRangeSelectionProvider = ({
 
     // console.log({ gapFilled });
 
-    // console.log({ oddEven });
+    console.log({ oddEven });
 
     setResolvedCursors(oddEven);
 

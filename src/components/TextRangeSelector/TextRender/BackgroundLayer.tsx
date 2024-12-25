@@ -27,19 +27,16 @@ const BackgroundLayer = ({
         };
       }, {})
     : {};
-
-  console.log({ cursorByPos });
-
   return (
     <>
       {parts.map((part, _index) => {
         // TODO: explain index
         const _start = part.s - index * chunkSize;
         const _end = part.e - index * chunkSize;
-        console.log({ _start, _end });
         const cursor = cursorByPos[part.s];
         return (
           <Fragment key={_index}>
+            {cursor && <CursorGhost pos={cursor} />}
             <span
               className={clsx(
                 // "text-transparent",
@@ -54,7 +51,6 @@ const BackgroundLayer = ({
             >
               {text.slice(_start, _end)}
             </span>
-            {cursor && <CursorGhost pos={cursor} />}
           </Fragment>
         );
       })}
