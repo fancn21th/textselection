@@ -32,6 +32,7 @@ export type ResolvedCursor = {
   isEven?: boolean;
   isOdd?: boolean;
   isFill?: boolean;
+  line?: number;
 };
 
 export type CursorPosition = {
@@ -72,47 +73,94 @@ export const TextRangeSelectionContext =
   );
 
 // utils
-function splitRangeIntoChunksWithLines(range, chunkSize) {
+function splitRangesByLine(ranges: ResolvedCursor[], lineLength: number) {
   const result = [];
-  const { s: start, e: end } = range;
 
-  // Start of the chunk sequence
-  let currentStart = Math.floor(start / chunkSize) * chunkSize;
-  let currentEnd = currentStart + chunkSize;
+  for (const range of ranges) {
+    const { s: start, e: end } = range;
 
-  // Ensure the first chunk fills up to the start
-  if (currentStart < start) {
-    result.push({
-      ...range,
-      s: currentStart,
-      e: start,
-      line: Math.floor(currentStart / chunkSize),
-      isFill: true,
-    });
-    currentStart = start;
+    // 起始行和结束行
+    let currentLine = Math.floor(start / lineLength) + 1;
+    let currentStart = start;
+
+    // 遍历范围，按行切分
+    while (currentStart < end) {
+      const lineStart = (currentLine - 1) * lineLength;
+      const lineEnd = currentLine * lineLength;
+
+      // 切分当前行的范围
+      result.push({
+        ...range,
+        line: currentLine,
+        s: Math.max(currentStart, lineStart),
+        e: Math.min(end, lineEnd),
+      });
+
+      // 移动到下一行
+      currentLine++;
+      currentStart = Math.min(end, lineEnd);
+    }
   }
 
-  // Main chunks
-  while (currentStart < end) {
-    currentEnd = Math.min(currentStart + chunkSize, end);
-    result.push({
-      ...range,
-      s: currentStart,
-      e: currentEnd,
-      line: Math.floor(currentStart / chunkSize),
-    });
-    currentStart = currentEnd;
+  return result;
+}
+
+function fillGaps(inputRanges: ResolvedCursor[], lineLength: number) {
+  const result = [];
+  const rangesByLine: { [key: number]: ResolvedCursor[] } = {};
+
+  // 按行组织数据
+  for (const range of inputRanges) {
+    const { line } = range;
+    if (!rangesByLine[line!]) {
+      rangesByLine[line!] = [];
+    }
+    rangesByLine[line!].push({ ...range });
   }
 
-  // Ensure the last chunk fills up after the end
-  if (currentStart % chunkSize !== 0) {
-    result.push({
-      ...range,
-      s: currentStart,
-      e: Math.ceil(currentStart / chunkSize) * chunkSize,
-      line: Math.floor(currentStart / chunkSize),
-      isFill: true,
-    });
+  // 遍历每一行，补全空隙
+  for (const [line, ranges] of Object.entries(rangesByLine)) {
+    const lineStart = (line - 1) * lineLength;
+    const lineEnd = line * lineLength;
+
+    // 按起始位置排序
+    ranges.sort((a: { s: number }, b: { s: number }) => a.s - b.s);
+
+    let currentStart = lineStart;
+
+    for (const range of ranges) {
+      const { s, e } = range;
+
+      // 补全空隙
+      if (currentStart < s) {
+        result.push({
+          line: Number(line),
+          s: currentStart,
+          e: s,
+          isFill: true,
+        });
+      }
+
+      // 添加当前区间
+      result.push({
+        ...range,
+        line: Number(line),
+        s,
+        e,
+      });
+
+      currentStart = e; // 更新当前起点
+    }
+
+    // 补全最后的空隙
+    if (currentStart < lineEnd) {
+      result.push({
+        line: Number(line),
+        s: currentStart,
+        e: lineEnd,
+        isFill: true,
+      });
+    }
   }
 
   return result;
@@ -128,10 +176,10 @@ export const TextRangeSelectionProvider = ({
   children: ReactNode;
 }) => {
   const [cursors, _setCursors] = useState<OriginCursor[]>([
-    { s: 1, e: 25 },
-    { s: 51, e: 99 },
-    { s: 2000, e: 2100 },
-    // { s: 600, e: 700 },
+    { s: 2, e: 25 },
+    { s: 15, e: 28 },
+    { s: 2000, e: 2700 },
+    { s: 2550, e: 3000 },
   ]);
 
   const [resolvedCursors, setResolvedCursors] = useState<ResolvedCursor[]>([]);
@@ -255,30 +303,37 @@ export const TextRangeSelectionProvider = ({
 
     // console.log({ deduped });
 
-    const oddEven = deduped.map((cursor, index) => ({
-      ...cursor,
-      isEven: index % 2 === 0,
-      isOdd: index % 2 === 1,
-    }));
+    let fixedIndex = 0;
+    const oddEven = deduped.map((cursor, index) => {
+      if (cursor.overLapped) {
+        fixedIndex++;
+      }
+      const isEven = (index - fixedIndex) % 2 === 0;
+      return {
+        ...cursor,
+        isEven,
+        isOdd: !isEven,
+      };
+    });
 
     // 填充空隙
     // TODO: 可以去掉
-    const gapFilled = [];
-    let lastEnd = 0;
-    for (const { s, e, index, overLapped, isEven, isOdd } of oddEven) {
-      if (s > lastEnd) {
-        gapFilled.push({ s: lastEnd, e: s, isGap: true });
-      }
-      gapFilled.push({ s, e, index, overLapped, isEven, isOdd });
-      lastEnd = e;
-    }
-    if (lastEnd < content.length) {
-      gapFilled.push({ s: lastEnd, e: content.length, isGap: true });
-    }
+    // const gapFilled = [];
+    // let lastEnd = 0;
+    // for (const { s, e, index, overLapped, isEven, isOdd } of oddEven) {
+    //   if (s > lastEnd) {
+    //     gapFilled.push({ s: lastEnd, e: s, isGap: true });
+    //   }
+    //   gapFilled.push({ s, e, index, overLapped, isEven, isOdd });
+    //   lastEnd = e;
+    // }
+    // if (lastEnd < content.length) {
+    //   gapFilled.push({ s: lastEnd, e: content.length, isGap: true });
+    // }
 
     // console.log({ gapFilled });
 
-    setResolvedCursors(gapFilled);
+    setResolvedCursors(oddEven);
 
     return () => {};
   }, [cursors]);
@@ -289,31 +344,33 @@ export const TextRangeSelectionProvider = ({
     const start = visibleLines.start * chunkSize;
     const end = (visibleLines.end + 1) * chunkSize;
 
+    console.log({ resolvedCursors });
+
     // 过滤掉不在可视区域的 cursor
-    const slimed = resolvedCursors
-      .filter((cursor) => {
-        return cursor.s < end && cursor.e > start;
-      })
-      .filter((cursor) => {
-        // TODO: removed
-        return cursor.isGap !== true;
-      });
+    const slimed = resolvedCursors.filter((cursor) => {
+      return cursor.s < end && cursor.e > start;
+    });
+    // .filter((cursor) => {
+    //   // TODO: removed
+    //   return cursor.isGap !== true;
+    // });
 
     console.log({ slimed });
 
-    const lines = slimed.reduce<ResolvedLine[]>((acc, cursor) => {
-      const chunks = splitRangeIntoChunksWithLines(cursor, chunkSize);
-      return [...acc, ...chunks];
-    }, []);
+    const splitted = splitRangesByLine(slimed, chunkSize);
 
-    console.log({ lines });
+    console.log({ splitted });
 
-    const linesPart = lines.reduce<LinesPart>((acc, line) => {
+    const gapFilled = fillGaps(splitted, chunkSize);
+
+    console.log({ gapFilled });
+
+    const linesPart = gapFilled.reduce<LinesPart>((acc, line) => {
       const { line: lineNumber } = line;
-      if (!acc[lineNumber]) {
-        acc[lineNumber] = [];
+      if (!acc[lineNumber - 1]) {
+        acc[lineNumber - 1] = [];
       }
-      acc[lineNumber].push({
+      acc[lineNumber - 1].push({
         ...line,
       });
       return acc;

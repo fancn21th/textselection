@@ -69,8 +69,15 @@ function Text() {
                         key={_index}
                         className={clsx(
                           // "text-transparent",
-                          part.isEven && !part.isFill && "bg-red-300",
-                          part.isOdd && !part.isFill && "bg-green-300",
+                          part.overLapped && "bg-gray-300",
+                          !part.overLapped &&
+                            part.isEven &&
+                            !part.isFill &&
+                            "bg-red-300",
+                          !part.overLapped &&
+                            part.isOdd &&
+                            !part.isFill &&
+                            "bg-green-300",
                           part.isFill && "bg-transparent"
                         )}
                       >
