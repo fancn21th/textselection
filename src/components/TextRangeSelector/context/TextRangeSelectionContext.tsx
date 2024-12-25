@@ -52,14 +52,18 @@ export type LinesPart = {
   [key: number]: [ResolvedCursor];
 };
 
+export type CursorByLine = {
+  [key: number]: CursorPosition[];
+};
+
 // Types for context value
 export type TextRangeSelectionContextType = {
   resolvedCursors: ResolvedCursor[];
-  sortedCursorPositions: CursorPosition[];
   text: string;
   content: string[];
   isDragging: boolean;
   visibleLinesPart: LinesPart;
+  sortedCursorPositions: CursorByLine;
   setText: (text: string) => void;
   setIsDragging: (isDragging: boolean) => void;
   setLineRange: (start: number, end: number) => void;
@@ -101,11 +105,14 @@ export const TextRangeSelectionProvider = ({
   });
   const [visibleLinesPart, setVisibleLinesPart] = useState<LinesPart>({});
 
-  const start = useRef(0);
-  const end = useRef(0);
+  const perfStart = useRef(0);
+  const perfEnd = useRef(0);
+  // TODO: check
+  const startRef = useRef(0);
+  const endRef = useRef(0);
 
   useEffect(() => {
-    start.current = performance.now();
+    perfStart.current = performance.now();
     // console.log("start", start.current);
 
     // 排序
@@ -242,7 +249,13 @@ export const TextRangeSelectionProvider = ({
 
     // console.log({ gapFilled });
 
+    // console.log({ oddEven });
+
     setResolvedCursors(oddEven);
+
+    perfEnd.current = performance.now();
+
+    // console.log("end", end.current);
 
     return () => {};
   }, [cursors]);
@@ -253,26 +266,25 @@ export const TextRangeSelectionProvider = ({
     const start = visibleLines.start * chunkSize;
     const end = (visibleLines.end + 1) * chunkSize;
 
-    console.log({ resolvedCursors });
+    startRef.current = start;
+    endRef.current = end;
+
+    // console.log({ resolvedCursors });
 
     // 过滤掉不在可视区域的 cursor
     const slimed = resolvedCursors.filter((cursor) => {
       return cursor.s < end && cursor.e > start;
     });
-    // .filter((cursor) => {
-    //   // TODO: removed
-    //   return cursor.isGap !== true;
-    // });
 
-    console.log({ slimed });
+    // console.log({ slimed });
 
     const splitted = splitRangesByLine(slimed, chunkSize);
 
-    console.log({ splitted });
+    // console.log({ splitted });
 
     const gapFilled = fillGaps(splitted, chunkSize);
 
-    console.log({ gapFilled });
+    // console.log({ gapFilled });
 
     const linesPart = gapFilled.reduce<LinesPart>((acc, line) => {
       const { line: lineNumber } = line;
@@ -285,14 +297,25 @@ export const TextRangeSelectionProvider = ({
       return acc;
     }, {});
 
-    console.log({ linesPart });
-
     setVisibleLinesPart(linesPart);
 
     return () => {};
   }, [visibleLines, resolvedCursors]);
 
-  // derived state 以下都是派生状态
+  const setText = (text: string) => {
+    _setText(text);
+    _setContent(text.split(splitter));
+  };
+
+  const setCursors = (cursors: OriginCursor[]) => {
+    _setCursors(cursors);
+  };
+
+  const setLineRange = (start: number, end: number) => {
+    _setVisibleLines({ start, end });
+  };
+
+  // 派生状态
 
   // console.log({ cursors });
 
@@ -312,26 +335,28 @@ export const TextRangeSelectionProvider = ({
 
   const sortedCursorPositions = cursorPositions
     .slice()
-    .sort((a, b) => a.pos - b.pos);
+    .sort((a, b) => a.pos - b.pos)
+    .filter((cursor) => {
+      return startRef.current <= cursor.pos && cursor.pos <= endRef.current;
+    })
+    .map((cursor) => {
+      return {
+        ...cursor,
+        lineNumber: Math.floor(cursor.pos / chunkSize),
+      };
+    })
+    .reduce<CursorByLine>((acc, cursor) => {
+      const { lineNumber } = cursor;
+      if (!acc[lineNumber]) {
+        acc[lineNumber] = [];
+      }
+      acc[lineNumber].push({
+        ...cursor,
+      });
+      return acc;
+    }, {});
 
-  // console.log({ sortedCursorPositions });
-
-  const setText = (text: string) => {
-    _setText(text);
-    _setContent(text.split(splitter));
-  };
-
-  const setCursors = (cursors: OriginCursor[]) => {
-    _setCursors(cursors);
-  };
-
-  const setLineRange = (start: number, end: number) => {
-    _setVisibleLines({ start, end });
-  };
-
-  end.current = performance.now();
-
-  // console.log("end", end.current);
+  console.log({ sortedCursorPositions });
 
   return (
     <TextRangeSelectionContext.Provider
@@ -339,13 +364,13 @@ export const TextRangeSelectionProvider = ({
         resolvedCursors,
         text,
         content,
-        sortedCursorPositions,
         isDragging,
         setCursors,
         setText,
         setIsDragging,
         setLineRange,
         visibleLinesPart,
+        sortedCursorPositions,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
@@ -355,7 +380,7 @@ export const TextRangeSelectionProvider = ({
           字符长度: <p>{text.length}</p>
           分段: <pre>{JSON.stringify(cursors, null, 2)}</pre>
           背景计算耗时:
-          <p>{`Execution time: ${end.current - start.current} ms`}</p>
+          <p>{`Execution time: ${perfEnd.current - perfStart.current} ms`}</p>
           正在拖拽:
           <p>{isDragging ? "是" : "否"}</p>
         </div>,

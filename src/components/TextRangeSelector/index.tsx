@@ -4,8 +4,6 @@ import {
   TextRangeSelectionProvider,
 } from "./context/TextRangeSelectionContext";
 import TextRender from "./TextRender";
-// import BackgroundRender from "./BackgroundRender";
-// import DragnDropRender from "./DragnDropRender";
 
 function Render({ text }: { text: string }) {
   const { setText } = useContext(TextRangeSelectionContext);
@@ -16,8 +14,6 @@ function Render({ text }: { text: string }) {
 
   return (
     <div className="relative w-[800px] h-[600px] border border-red-500 overflow-y-scroll">
-      {/* <DragnDropRender></DragnDropRender>
-      <BackgroundRender></BackgroundRender> */}
       <TextRender></TextRender>
     </div>
   );
