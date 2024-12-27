@@ -8,11 +8,16 @@ import { NewTRSContext, NewTRSProvider } from "./context/NewTRSContext";
 
 function Render({ text }: { text: string }) {
   const { setText } = useContext(TextRangeSelectionContext);
-  const { setFullText } = useContext(NewTRSContext);
+  const { setFullText, setTextRanges } = useContext(NewTRSContext);
 
   useEffect(() => {
     setText(text);
     setFullText(text);
+    setTextRanges([
+      { s: 20, e: 30 },
+      { s: 25, e: 40 },
+      { s: 35, e: 50 },
+    ]);
   }, []);
 
   return (
