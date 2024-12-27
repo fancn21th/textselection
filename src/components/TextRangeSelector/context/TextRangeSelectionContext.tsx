@@ -250,7 +250,7 @@ export const TextRangeSelectionProvider = ({
 
     // console.log({ gapFilled });
 
-    console.log({ oddEven });
+    // console.log({ oddEven });
 
     setResolvedCursors(oddEven);
 
@@ -357,7 +357,7 @@ export const TextRangeSelectionProvider = ({
       return acc;
     }, {});
 
-  console.log({ sortedCursorPositions });
+  // console.log({ sortedCursorPositions });
 
   return (
     <TextRangeSelectionContext.Provider
