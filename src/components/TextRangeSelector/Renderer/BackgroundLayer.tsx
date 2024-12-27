@@ -23,9 +23,20 @@ const Part = ({
   const isGap = part.isGap; // 空隙部分
 
   useEffect(() => {
+    // 非空隙部分，且 hoverIndex 包含当前区域
     if (
       !hoverObj.isGap &&
       !isGap &&
+      part.hoverIndex.includes(hoverObj.rangeIndex[0])
+    ) {
+      setIsActivated(true);
+      return;
+    }
+
+    // 空隙部分，且 hoverIndex 包含当前区域
+    if (
+      hoverObj.isGap &&
+      isGap &&
       part.hoverIndex.includes(hoverObj.rangeIndex[0])
     ) {
       setIsActivated(true);
