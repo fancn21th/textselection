@@ -1,11 +1,7 @@
 import { useContext, useEffect } from "react";
-import {
-  CursorPosition,
-  TextRangeSelectionContext,
-  TextRangeSelectionContextType,
-} from "../../deprecated/TextRangeSelectionContext";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
+import { NewTRSContext } from "../context/NewTRSContext";
 
 const predefinedColors = [
   "text-red-500",
@@ -16,10 +12,8 @@ const predefinedColors = [
   "text-pink-500",
 ];
 
-export function CursorGhost({ pos }: { pos: CursorPosition }) {
-  const { setIsDragging } = useContext<TextRangeSelectionContextType>(
-    TextRangeSelectionContext
-  );
+export function CursorGhost({ pos }: { pos: { index: number } }) {
+  const { setIsDragging } = useContext(NewTRSContext);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
@@ -41,7 +35,7 @@ export function CursorGhost({ pos }: { pos: CursorPosition }) {
         // "text-transparent",
         "font-extrabold",
         "absolute z-50 cursor-move",
-        predefinedColors[pos.origin % predefinedColors.length],
+        predefinedColors[pos.index % predefinedColors.length],
         isDragging && "opacity-50"
       )}
       ref={drag}

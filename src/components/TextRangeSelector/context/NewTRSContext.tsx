@@ -6,6 +6,7 @@ import {
 } from "./NewUtils";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { createPortal } from "react-dom";
 
 export const LineCharCount = 50;
 
@@ -14,10 +15,12 @@ export type NewTRSContextType = {
   fullText: string;
   charCount: number;
   byLine: SplittedByLineTextRange[];
+  textRanges: IndexedOriginTextRange[];
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
+  setIsDragging: (isDragging: boolean) => void;
 };
 
 export type OriginTextRange = {
@@ -60,6 +63,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -68,7 +72,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const setTextRanges = (ranges: OriginTextRange[]) => {
-    // sorted by start
+    // sorted by start position
     const sorted = ranges.slice().sort((a, b) => a.s - b.s);
 
     _setTextRanges(
@@ -91,7 +95,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
-    const overLapped = toOverLappedTextRanges(textRanges);
+    const overLapped = toOverLappedTextRanges(Array.from(textRanges));
     // 第二步：填充
     const _gapFilled = fillGaps(overLapped, charCount);
     setGapFilled(_gapFilled);
@@ -127,9 +131,20 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setNewLineRange,
         fullText,
         byLine,
+        textRanges,
+        setIsDragging,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+      {/* debugger */}
+      {createPortal(
+        <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
+          字符长度: <p>{charCount}</p>
+          分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre>
+          正在拖动: <p>{isDragging ? "是" : "否"}</p>
+        </div>,
+        document.body
+      )}
     </NewTRSContext.Provider>
   );
 };

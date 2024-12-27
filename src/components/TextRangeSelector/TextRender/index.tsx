@@ -69,7 +69,6 @@ function Text() {
         {({ index, style }: { index: number; style: React.CSSProperties }) => {
           const text = chunks[index];
           const parts = byLineByKey[index];
-          // const cursors = sortedCursorPositions[index];
 
           return (
             <div style={style}>
@@ -80,12 +79,7 @@ function Text() {
               {/* background layer */}
               <div className={clsx("absolute left-0 top-0")}>
                 {parts && (
-                  <BackgroundLayer
-                    parts={parts}
-                    index={index}
-                    text={text}
-                    // cursors={cursors}
-                  />
+                  <BackgroundLayer parts={parts} index={index} text={text} />
                 )}
               </div>
               {/* dnd layer */}

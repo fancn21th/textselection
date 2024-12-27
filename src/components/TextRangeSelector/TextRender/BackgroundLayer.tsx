@@ -5,28 +5,17 @@ import {
   LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 
-// import { CursorGhost } from "./Cursor";
+import { CursorGhost } from "./Cursor";
 
 const BackgroundLayer = ({
   parts,
   index,
   text,
-}: // cursors,
-{
+}: {
   parts: SplittedByLineTextRange[];
   index: number;
   text: string;
-  // cursors: CursorPosition[] | undefined | null;
 }) => {
-  // const hasCursor = cursors && cursors.length > 0;
-  // const cursorByPos = hasCursor
-  //   ? cursors.reduce((acc, cursor) => {
-  //       return {
-  //         ...acc,
-  //         [cursor.pos]: cursor,
-  //       };
-  //     }, {})
-  //   : {};
   return (
     <>
       {parts.map((part, _index) => {
@@ -37,10 +26,11 @@ const BackgroundLayer = ({
         const isOdd = part.index % 2 === 1;
         const isEven = part.index % 2 === 0;
         const isGap = part.isGap;
-        // const cursor = cursorByPos[part.s];
         return (
           <Fragment key={_index}>
-            {/* {cursor && <CursorGhost pos={cursor} />} */}
+            {isEven && !overlapped && (
+              <CursorGhost pos={{ index: part.index }} />
+            )}
             <span
               className={clsx(
                 // "text-transparent",
@@ -52,6 +42,9 @@ const BackgroundLayer = ({
             >
               {text.slice(_start, _end)}
             </span>
+            {isEven && overlapped && (
+              <CursorGhost pos={{ index: part.index }} />
+            )}
           </Fragment>
         );
       })}
