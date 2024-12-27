@@ -34,13 +34,15 @@ function Text() {
 
   // byLine 转换
 
-  const byLineByKey = byLine.reduce<ByKey>((acc, cur) => {
-    if (!acc[cur.lineNumber]) {
-      acc[cur.lineNumber] = [];
-    }
-    acc[cur.lineNumber].push(cur);
-    return acc;
-  }, {});
+  const byLineByKey = useMemo(() => {
+    return byLine.reduce<ByKey>((acc, cur) => {
+      if (!acc[cur.lineNumber]) {
+        acc[cur.lineNumber] = [];
+      }
+      acc[cur.lineNumber].push(cur);
+      return acc;
+    }, {});
+  }, [byLine]);
 
   console.log({ byLineByKey });
 
@@ -79,7 +81,11 @@ function Text() {
               {/* background layer */}
               <div className={clsx("absolute left-0 top-0")}>
                 {parts && (
-                  <BackgroundLayer parts={parts} index={index} text={text} />
+                  <BackgroundLayer
+                    parts={parts}
+                    lineIndex={index}
+                    text={text}
+                  />
                 )}
               </div>
               {/* dnd layer */}

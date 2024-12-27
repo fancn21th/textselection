@@ -40,20 +40,26 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
         {
           s: current.s,
           e: current.headOverlappedPos,
-          index: current.index,
+          index: -1,
           overlapped: [current.headOverlappedIndex],
+          isOverlapped: true,
         },
         {
           s: current.headOverlappedPos,
           e: current.tailOverlappedPos,
           index: current.index,
-          overlapped: null,
+          overlapped: [
+            current.headOverlappedIndex,
+            current.tailOverlappedIndex,
+          ],
+          isOverlapped: false,
         },
         {
           s: current.tailOverlappedPos,
           e: current.e,
-          index: current.index,
+          index: -1,
           overlapped: [current.tailOverlappedIndex],
+          isOverlapped: true,
         },
       ];
     }
@@ -63,14 +69,16 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
         {
           s: current.s,
           e: current.headOverlappedPos,
-          index: current.index,
+          index: -1,
           overlapped: [current.headOverlappedIndex],
+          isOverlapped: true,
         },
         {
           s: current.headOverlappedPos,
           e: current.e,
           index: current.index,
-          overlapped: null,
+          overlapped: [current.headOverlappedIndex],
+          isOverlapped: false,
         },
       ];
     }
@@ -81,13 +89,15 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           s: current.s,
           e: current.tailOverlappedPos,
           index: current.index,
-          overlapped: null,
+          overlapped: [current.tailOverlappedIndex],
+          isOverlapped: false,
         },
         {
           s: current.tailOverlappedPos,
           e: current.e,
-          index: current.index,
+          index: -1,
           overlapped: [current.tailOverlappedIndex],
+          isOverlapped: true,
         },
       ];
     }
@@ -97,7 +107,8 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
         s: current.s,
         e: current.e,
         index: current.index,
-        overlapped: null,
+        overlapped: [],
+        isOverlapped: false,
       },
     ];
   });
@@ -131,17 +142,18 @@ export const fillGaps = (
 ): GapFilledTextRange[] => {
   const gapFilled = [];
   let lastEnd = 0;
-  for (const { s, e, index, overlapped } of ranges) {
+  for (const { s, e, index, overlapped, isOverlapped } of ranges) {
     if (s > lastEnd) {
       gapFilled.push({
         s: lastEnd,
         e: s,
         index: -1,
-        overlapped: null,
+        overlapped: [],
+        isOverlapped: false,
         isGap: true,
       });
     }
-    gapFilled.push({ s, e, index, overlapped, isGap: false });
+    gapFilled.push({ s, e, index, overlapped, isGap: false, isOverlapped });
     lastEnd = e;
   }
   if (lastEnd < length) {
@@ -149,7 +161,8 @@ export const fillGaps = (
       s: lastEnd,
       e: length,
       index: -1,
-      overlapped: null,
+      overlapped: [],
+      isOverlapped: false,
       isGap: true,
     });
   }
@@ -164,7 +177,7 @@ export const splitRangesByLine = (
 ): SplittedByLineTextRange[] => {
   const result: SplittedByLineTextRange[] = [];
 
-  for (const { s, e, index, overlapped, isGap } of ranges) {
+  for (const { s, e, index, overlapped, isGap, isOverlapped } of ranges) {
     const startLineIndex = Math.floor(s / lineLength);
     const endLineIndex = Math.floor(e / lineLength);
 
@@ -185,6 +198,7 @@ export const splitRangesByLine = (
           overlapped,
           isGap,
           lineNumber: line,
+          isOverlapped,
         });
       }
     }

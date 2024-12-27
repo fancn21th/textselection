@@ -8,11 +8,10 @@ function Render({ text }: { text: string }) {
   useEffect(() => {
     setFullText(text);
     setTextRanges([
-      { s: 20, e: 30 },
-      { s: 25, e: 40 },
-      { s: 35, e: 51 },
-      { s: 60, e: 200 },
-      { s: 1000, e: 1100 },
+      { s: 0, e: 10 },
+      { s: 5, e: 20 },
+      { s: 15, e: 25 },
+      // { s: 1000, e: 1100 },
     ]);
   }, []);
 

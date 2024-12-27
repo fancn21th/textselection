@@ -9,25 +9,26 @@ import { CursorGhost } from "./Cursor";
 
 const BackgroundLayer = ({
   parts,
-  index,
+  lineIndex,
   text,
 }: {
   parts: SplittedByLineTextRange[];
-  index: number;
+  lineIndex: number;
   text: string;
 }) => {
   return (
     <>
       {parts.map((part, _index) => {
-        // TODO: explain index
-        const _start = part.s - index * chunkSize;
-        const _end = part.e - index * chunkSize;
-        const overlapped = !!part.overlapped;
-        const isOdd = part.index % 2 === 1;
-        const isEven = part.index % 2 === 0;
-        const isGap = part.isGap;
+        const _start = part.s - lineIndex * chunkSize;
+        const _end = part.e - lineIndex * chunkSize;
+        const overlapped = part.isOverlapped; // 重叠部分
+        const isOdd = part.index % 2 === 1; // 奇数区域
+        const isEven = part.index % 2 === 0; // 偶数区域
+        const isGap = part.isGap; // 空隙部分
+
         return (
           <Fragment key={_index}>
+            {/* 偶数区域 */}
             {isEven && !overlapped && (
               <CursorGhost pos={{ index: part.index }} />
             )}
@@ -42,9 +43,6 @@ const BackgroundLayer = ({
             >
               {text.slice(_start, _end)}
             </span>
-            {isEven && overlapped && (
-              <CursorGhost pos={{ index: part.index }} />
-            )}
           </Fragment>
         );
       })}

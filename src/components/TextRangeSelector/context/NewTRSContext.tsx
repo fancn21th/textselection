@@ -16,6 +16,7 @@ export type NewTRSContextType = {
   charCount: number;
   byLine: SplittedByLineTextRange[];
   textRanges: IndexedOriginTextRange[];
+  isDragging: boolean;
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
@@ -33,7 +34,8 @@ export type IndexedOriginTextRange = OriginTextRange & {
 };
 
 export type OverlappedTextRange = IndexedOriginTextRange & {
-  overlapped: number[] | null;
+  overlapped: number[];
+  isOverlapped: boolean;
 };
 
 export type GapFilledTextRange = OverlappedTextRange & {
@@ -63,7 +65,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, _setIsDragging] = useState(false);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -92,12 +94,18 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const setIsDragging = (isDragging: boolean) => {
+    _setIsDragging(isDragging);
+  };
+
   // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
     const overLapped = toOverLappedTextRanges(Array.from(textRanges));
+    // console.log({ overLapped });
     // 第二步：填充
     const _gapFilled = fillGaps(overLapped, charCount);
+    // console.log({ _gapFilled });
     setGapFilled(_gapFilled);
   }, [textRanges, charCount]);
 
@@ -133,6 +141,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         byLine,
         textRanges,
         setIsDragging,
+        isDragging,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
