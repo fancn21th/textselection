@@ -17,6 +17,7 @@ export type NewTRSContextType = {
   byLine: SplittedByLineTextRange[];
   textRanges: IndexedOriginTextRange[];
   isDragging: boolean;
+  cursorPositions: CursorPosition[];
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
@@ -27,6 +28,7 @@ export type NewTRSContextType = {
 export type OriginTextRange = {
   s: number;
   e: number;
+  index: number;
 };
 
 export type IndexedOriginTextRange = OriginTextRange & {
@@ -51,6 +53,11 @@ export type LineRange = {
   e: number;
 } | null;
 
+export type CursorPosition = {
+  pos: number; // 坐标
+  type: "s" | "e"; // 起点或者是终点
+};
+
 // 创建 Context
 // TODO: context warning
 export const NewTRSContext = createContext<NewTRSContextType>(
@@ -62,6 +69,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [charCount, setCharCount] = useState(0);
   const [fullText, _setFullText] = useState("");
   const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]);
+  const [cursorPositions, setCursorPositions] = useState<CursorPosition[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
@@ -76,6 +84,23 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const setTextRanges = (ranges: OriginTextRange[]) => {
     // sorted by start position
     const sorted = ranges.slice().sort((a, b) => a.s - b.s);
+
+    setCursorPositions(
+      sorted.slice().flatMap<CursorPosition>((range, index) => {
+        return [
+          {
+            pos: range.s,
+            type: "s",
+            index,
+          },
+          {
+            pos: range.e,
+            type: "e",
+            index,
+          },
+        ];
+      })
+    );
 
     _setTextRanges(
       sorted.map((range, index) => {
@@ -140,6 +165,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         fullText,
         byLine,
         textRanges,
+        cursorPositions,
         setIsDragging,
         isDragging,
       }}

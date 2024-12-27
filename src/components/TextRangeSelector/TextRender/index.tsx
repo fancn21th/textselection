@@ -7,7 +7,7 @@ import {
 import { FixedSizeList as List } from "react-window";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
-// import DndLayer from "./DndLayer";
+import DndLayer from "./DndLayer";
 import BackgroundLayer from "./BackgroundLayer";
 
 type ByKey = {
@@ -89,9 +89,9 @@ function Text() {
                 )}
               </div>
               {/* dnd layer */}
-              {/* <div className={clsx("absolute left-0 top-0")}>
+              <div className={clsx("absolute left-0 top-0")}>
                 <DndLayer text={text} />
-              </div> */}
+              </div>
             </div>
           );
         }}

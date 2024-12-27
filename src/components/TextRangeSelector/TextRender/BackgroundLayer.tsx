@@ -21,6 +21,7 @@ const BackgroundLayer = ({
       {parts.map((part, _index) => {
         const _start = part.s - lineIndex * chunkSize;
         const _end = part.e - lineIndex * chunkSize;
+        const _partText = text.slice(_start, _end);
         const overlapped = part.isOverlapped; // 重叠部分
         const isOdd = part.index % 2 === 1; // 奇数区域
         const isEven = part.index % 2 === 0; // 偶数区域
@@ -28,10 +29,6 @@ const BackgroundLayer = ({
 
         return (
           <Fragment key={_index}>
-            {/* 偶数区域 */}
-            {isEven && !overlapped && (
-              <CursorGhost pos={{ index: part.index }} />
-            )}
             <span
               className={clsx(
                 // "text-transparent",
@@ -41,7 +38,7 @@ const BackgroundLayer = ({
                 isGap && "bg-transparent"
               )}
             >
-              {text.slice(_start, _end)}
+              {_partText}
             </span>
           </Fragment>
         );
