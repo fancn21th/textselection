@@ -208,7 +208,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
           字符长度: <p>{charCount}</p>
           {/* 分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
           正在拖动: <p>{isDragging ? "是" : "否"}</p>
-          Hover: <pre>{JSON.stringify(hoverObj, null, 2)}</pre>
+          激活范围: <pre>{JSON.stringify(hoverObj, null, 2)}</pre>
         </div>,
         document.body
       )}
