@@ -28,7 +28,6 @@ export type NewTRSContextType = {
 export type OriginTextRange = {
   s: number;
   e: number;
-  index: number;
 };
 
 export type IndexedOriginTextRange = OriginTextRange & {
