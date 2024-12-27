@@ -81,7 +81,7 @@ export const TextRangeSelectionContext =
 // 创建 Provider 组件
 import { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { fillGaps, splitRangesByLine } from "./utis";
+import { fillGaps, splitRangesByLine } from "../TextRangeSelector/context/utis";
 
 export const TextRangeSelectionProvider = ({
   children,

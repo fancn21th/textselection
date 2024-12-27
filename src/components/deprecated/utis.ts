@@ -1,4 +1,4 @@
-import { ResolvedCursor } from "./TextRangeSelectionContext";
+import { ResolvedCursor } from "../../deprecated/TextRangeSelectionContext";
 
 export function splitRangesByLine(
   ranges: ResolvedCursor[],

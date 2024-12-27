@@ -1,17 +1,11 @@
 import { useContext, useEffect } from "react";
-import {
-  TextRangeSelectionContext,
-  TextRangeSelectionProvider,
-} from "./context/TextRangeSelectionContext";
 import TextRender from "./TextRender";
 import { NewTRSContext, NewTRSProvider } from "./context/NewTRSContext";
 
 function Render({ text }: { text: string }) {
-  const { setText } = useContext(TextRangeSelectionContext);
   const { setFullText, setTextRanges } = useContext(NewTRSContext);
 
   useEffect(() => {
-    setText(text);
     setFullText(text);
     setTextRanges([
       { s: 20, e: 30 },
@@ -29,11 +23,9 @@ function Render({ text }: { text: string }) {
 
 function TextRangeSelector({ text }: { text: string }) {
   return (
-    <TextRangeSelectionProvider>
-      <NewTRSProvider>
-        <Render text={text}></Render>
-      </NewTRSProvider>
-    </TextRangeSelectionProvider>
+    <NewTRSProvider>
+      <Render text={text}></Render>
+    </NewTRSProvider>
   );
 }
 

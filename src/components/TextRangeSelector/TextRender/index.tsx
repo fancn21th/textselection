@@ -1,9 +1,8 @@
 import { useContext, useMemo, useState } from "react";
 import {
-  TextRangeSelectionContext,
-  chunkSize,
-} from "../context/TextRangeSelectionContext";
-import type { TextRangeSelectionContextType } from "../context/TextRangeSelectionContext";
+  NewTRSContext,
+  LineCharCount as chunkSize,
+} from "../context/NewTRSContext";
 import { FixedSizeList as List } from "react-window";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
@@ -11,8 +10,7 @@ import DndLayer from "./DndLayer";
 import BackgroundLayer from "./BackgroundLayer";
 
 function Text() {
-  const { text, setLineRange, visibleLinesPart, sortedCursorPositions } =
-    useContext<TextRangeSelectionContextType>(TextRangeSelectionContext);
+  const { setNewLineRange, fullText: text } = useContext(NewTRSContext);
 
   // 跟踪当前可视区域的 chunk 索引
   const [visibleRange, setVisibleRange] = useState({
@@ -44,7 +42,7 @@ function Text() {
           visibleStopIndex: number;
         }) => {
           // 更新当前可视区域
-          setLineRange(visibleStartIndex, visibleStopIndex);
+          setNewLineRange(visibleStartIndex, visibleStopIndex);
           setVisibleRange({
             startIndex: visibleStartIndex,
             endIndex: visibleStopIndex,
@@ -53,8 +51,8 @@ function Text() {
       >
         {({ index, style }: { index: number; style: React.CSSProperties }) => {
           const text = chunks[index];
-          const parts = visibleLinesPart[index];
-          const cursors = sortedCursorPositions[index];
+          // const parts = visibleLinesPart[index];
+          // const cursors = sortedCursorPositions[index];
           return (
             <div style={style}>
               {/* text layer */}
@@ -62,7 +60,7 @@ function Text() {
                 <span className={clsx()}>{text}</span>
               </div>
               {/* background layer */}
-              <div className={clsx("absolute left-0 top-0")}>
+              {/* <div className={clsx("absolute left-0 top-0")}>
                 {parts && (
                   <BackgroundLayer
                     parts={parts}
@@ -71,11 +69,11 @@ function Text() {
                     cursors={cursors}
                   />
                 )}
-              </div>
+              </div> */}
               {/* dnd layer */}
-              <div className={clsx("absolute left-0 top-0")}>
+              {/* <div className={clsx("absolute left-0 top-0")}>
                 <DndLayer text={text} />
-              </div>
+              </div> */}
             </div>
           );
         }}

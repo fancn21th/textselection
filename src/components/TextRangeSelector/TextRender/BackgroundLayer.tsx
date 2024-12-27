@@ -3,7 +3,7 @@ import {
   chunkSize,
   CursorPosition,
   ResolvedCursor,
-} from "../context/TextRangeSelectionContext";
+} from "../../deprecated/TextRangeSelectionContext";
 import { Fragment } from "react/jsx-runtime";
 import { CursorGhost } from "./Cursor";
 

@@ -3,7 +3,7 @@ import {
   CursorPosition,
   TextRangeSelectionContext,
   TextRangeSelectionContextType,
-} from "../context/TextRangeSelectionContext";
+} from "../../deprecated/TextRangeSelectionContext";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
 

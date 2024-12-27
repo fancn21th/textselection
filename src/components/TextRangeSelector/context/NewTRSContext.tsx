@@ -1,12 +1,22 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
-import { fillGaps, toOverLappedTextRanges } from "./NewUtils";
+import {
+  fillGaps,
+  splitRangesByLine,
+  toOverLappedTextRanges,
+} from "./NewUtils";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
+export const LineCharCount = 50;
 
 // Types for context value
 export type NewTRSContextType = {
+  fullText: string;
   charCount: number;
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
+  setNewLineRange: (s: number, e: number) => void;
 };
 
 export type OriginTextRange = {
@@ -30,6 +40,11 @@ export type SplittedByLineTextRange = GapFilledTextRange & {
   lineNumber: number;
 };
 
+export type LineRange = {
+  s: number;
+  e: number;
+} | null;
+
 // 创建 Context
 // TODO: context warning
 export const NewTRSContext = createContext<NewTRSContextType>(
@@ -42,6 +57,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [fullText, _setFullText] = useState("");
   const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
+  const [lineRange, _setLineRange] = useState<LineRange>(null);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -63,6 +79,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const setNewLineRange = (s: number, e: number) => {
+    _setLineRange({
+      s,
+      e,
+    });
+  };
+
   // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
@@ -74,14 +97,34 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
 
   // 窗口的切分计算
   useEffect(() => {
-    console.log({ gapFilled });
-  }, [gapFilled]);
+    if (!lineRange || gapFilled.length === 0) return;
+
+    console.log({ lineRange, gapFilled });
+
+    // 窗口过滤
+
+    const byLine = splitRangesByLine(
+      gapFilled,
+      LineCharCount,
+      lineRange.s,
+      lineRange.e
+    );
+
+    console.log({ byLine });
+  }, [gapFilled, lineRange]);
 
   return (
     <NewTRSContext.Provider
-      value={{ charCount, setCharCount, setFullText, setTextRanges }}
+      value={{
+        charCount,
+        setCharCount,
+        setFullText,
+        setTextRanges,
+        setNewLineRange,
+        fullText,
+      }}
     >
-      {children}
+      <DndProvider backend={HTML5Backend}>{children}</DndProvider>
     </NewTRSContext.Provider>
   );
 };

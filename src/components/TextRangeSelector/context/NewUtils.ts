@@ -2,6 +2,7 @@ import {
   GapFilledTextRange,
   IndexedOriginTextRange,
   OverlappedTextRange,
+  SplittedByLineTextRange,
 } from "./NewTRSContext";
 
 type Marked = IndexedOriginTextRange & {
@@ -153,4 +154,41 @@ export const fillGaps = (
     });
   }
   return gapFilled;
+};
+
+export const splitRangesByLine = (
+  ranges: GapFilledTextRange[],
+  lineLength: number,
+  startLine: number,
+  endLine: number
+): SplittedByLineTextRange[] => {
+  const result: SplittedByLineTextRange[] = [];
+
+  for (const { s, e, index, overlapped, isGap } of ranges) {
+    const startLineIndex = Math.floor(s / lineLength);
+    const endLineIndex = Math.floor(e / lineLength);
+
+    for (let line = startLineIndex; line <= endLineIndex; line++) {
+      const lineStart = line * lineLength;
+      const lineEnd = (line + 1) * lineLength;
+
+      // 计算子范围
+      const subRangeStart = Math.max(s, lineStart);
+      const subRangeEnd = Math.min(e, lineEnd);
+
+      // 确保范围有效且在窗口范围内
+      if (subRangeStart < subRangeEnd && line >= startLine && line < endLine) {
+        result.push({
+          s: subRangeStart,
+          e: subRangeEnd,
+          index,
+          overlapped,
+          isGap,
+          lineNumber: line,
+        });
+      }
+    }
+  }
+
+  return result;
 };

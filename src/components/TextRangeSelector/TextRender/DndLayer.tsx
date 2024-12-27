@@ -4,7 +4,7 @@ import {
   OriginCursor,
   TextRangeSelectionContext,
   TextRangeSelectionContextType,
-} from "../context/TextRangeSelectionContext";
+} from "../../deprecated/TextRangeSelectionContext";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
 
