@@ -13,6 +13,7 @@ export const LineCharCount = 50;
 export type NewTRSContextType = {
   fullText: string;
   charCount: number;
+  byLine: SplittedByLineTextRange[];
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
@@ -58,6 +59,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [lineRange, _setLineRange] = useState<LineRange>(null);
+  const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -103,14 +105,16 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
 
     // 窗口过滤
 
-    const byLine = splitRangesByLine(
+    const _byLine = splitRangesByLine(
       gapFilled,
       LineCharCount,
       lineRange.s,
       lineRange.e
     );
 
-    console.log({ byLine });
+    console.log({ _byLine });
+
+    setByLine(_byLine);
   }, [gapFilled, lineRange]);
 
   return (
@@ -122,6 +126,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setTextRanges,
         setNewLineRange,
         fullText,
+        byLine,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>

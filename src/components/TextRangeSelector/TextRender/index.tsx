@@ -1,16 +1,21 @@
 import { useContext, useMemo, useState } from "react";
 import {
   NewTRSContext,
+  SplittedByLineTextRange,
   LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 import { FixedSizeList as List } from "react-window";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
-import DndLayer from "./DndLayer";
+// import DndLayer from "./DndLayer";
 import BackgroundLayer from "./BackgroundLayer";
 
+type ByKey = {
+  [key: number]: SplittedByLineTextRange[];
+};
+
 function Text() {
-  const { setNewLineRange, fullText: text } = useContext(NewTRSContext);
+  const { setNewLineRange, fullText: text, byLine } = useContext(NewTRSContext);
 
   // 跟踪当前可视区域的 chunk 索引
   const [visibleRange, setVisibleRange] = useState({
@@ -26,6 +31,18 @@ function Text() {
     }
     return result;
   }, [text]);
+
+  // byLine 转换
+
+  const byLineByKey = byLine.reduce<ByKey>((acc, cur) => {
+    if (!acc[cur.lineNumber]) {
+      acc[cur.lineNumber] = [];
+    }
+    acc[cur.lineNumber].push(cur);
+    return acc;
+  }, {});
+
+  console.log({ byLineByKey });
 
   return (
     <>
@@ -51,8 +68,9 @@ function Text() {
       >
         {({ index, style }: { index: number; style: React.CSSProperties }) => {
           const text = chunks[index];
-          // const parts = visibleLinesPart[index];
+          const parts = byLineByKey[index];
           // const cursors = sortedCursorPositions[index];
+
           return (
             <div style={style}>
               {/* text layer */}
@@ -60,16 +78,16 @@ function Text() {
                 <span className={clsx()}>{text}</span>
               </div>
               {/* background layer */}
-              {/* <div className={clsx("absolute left-0 top-0")}>
+              <div className={clsx("absolute left-0 top-0")}>
                 {parts && (
                   <BackgroundLayer
                     parts={parts}
                     index={index}
                     text={text}
-                    cursors={cursors}
+                    // cursors={cursors}
                   />
                 )}
-              </div> */}
+              </div>
               {/* dnd layer */}
               {/* <div className={clsx("absolute left-0 top-0")}>
                 <DndLayer text={text} />

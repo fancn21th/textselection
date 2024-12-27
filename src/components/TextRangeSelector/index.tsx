@@ -10,7 +10,8 @@ function Render({ text }: { text: string }) {
     setTextRanges([
       { s: 20, e: 30 },
       { s: 25, e: 40 },
-      { s: 35, e: 50 },
+      { s: 35, e: 51 },
+      { s: 60, e: 200 },
     ]);
   }, []);
 
