@@ -16,7 +16,6 @@ const Part = ({
 }) => {
   const { hoverObj, setRangeHover } = useContext(NewTRSContext);
   const [isActivated, setIsActivated] = useState(false);
-  const [isHighlighted, setIsHighlighted] = useState(false);
 
   const overlapped = part.isOverlapped; // 重叠部分
   const isOdd = part.index % 2 === 1; // 奇数区域
@@ -48,8 +47,7 @@ const Part = ({
   }, [hoverObj]);
 
   const highlight = (index: number[], isGap: boolean, overlapped: boolean) => {
-    if (!isHighlighted) setRangeHover(index, isGap, overlapped);
-    setIsHighlighted(!isHighlighted);
+    setRangeHover(index, isGap, overlapped);
   };
 
   return (
