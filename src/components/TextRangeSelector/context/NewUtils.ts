@@ -41,13 +41,15 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           s: current.s,
           e: current.headOverlappedPos,
           index: -1,
+          hoverIndex: [current.headOverlappedIndex, current.index],
           overlapped: [current.headOverlappedIndex],
-          isOverlapped: true,
+          isOverlapped: true, // 重叠部分
         },
         {
           s: current.headOverlappedPos,
           e: current.tailOverlappedPos,
           index: current.index,
+          hoverIndex: [current.index],
           overlapped: [
             current.headOverlappedIndex,
             current.tailOverlappedIndex,
@@ -58,8 +60,9 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           s: current.tailOverlappedPos,
           e: current.e,
           index: -1,
+          hoverIndex: [current.tailOverlappedIndex, current.index],
           overlapped: [current.tailOverlappedIndex],
-          isOverlapped: true,
+          isOverlapped: true, // 重叠部分
         },
       ];
     }
@@ -71,12 +74,14 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           e: current.headOverlappedPos,
           index: -1,
           overlapped: [current.headOverlappedIndex],
-          isOverlapped: true,
+          hoverIndex: [current.headOverlappedIndex, current.index],
+          isOverlapped: true, // 重叠部分
         },
         {
           s: current.headOverlappedPos,
           e: current.e,
           index: current.index,
+          hoverIndex: [current.index],
           overlapped: [current.headOverlappedIndex],
           isOverlapped: false,
         },
@@ -89,6 +94,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           s: current.s,
           e: current.tailOverlappedPos,
           index: current.index,
+          hoverIndex: [current.index],
           overlapped: [current.tailOverlappedIndex],
           isOverlapped: false,
         },
@@ -97,7 +103,8 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
           e: current.e,
           index: -1,
           overlapped: [current.tailOverlappedIndex],
-          isOverlapped: true,
+          hoverIndex: [current.tailOverlappedIndex, current.index],
+          isOverlapped: true, // 重叠部分
         },
       ];
     }
@@ -107,6 +114,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
         s: current.s,
         e: current.e,
         index: current.index,
+        hoverIndex: [current.index],
         overlapped: [],
         isOverlapped: false,
       },
@@ -142,18 +150,28 @@ export const fillGaps = (
 ): GapFilledTextRange[] => {
   const gapFilled = [];
   let lastEnd = 0;
-  for (const { s, e, index, overlapped, isOverlapped } of ranges) {
+  let gapIndex = 0;
+  for (const { s, e, index, overlapped, isOverlapped, hoverIndex } of ranges) {
     if (s > lastEnd) {
       gapFilled.push({
         s: lastEnd,
         e: s,
         index: -1,
+        hoverIndex: [gapIndex++],
         overlapped: [],
         isOverlapped: false,
         isGap: true,
       });
     }
-    gapFilled.push({ s, e, index, overlapped, isGap: false, isOverlapped });
+    gapFilled.push({
+      s,
+      e,
+      index,
+      hoverIndex,
+      overlapped,
+      isGap: false,
+      isOverlapped,
+    });
     lastEnd = e;
   }
   if (lastEnd < length) {
@@ -161,6 +179,7 @@ export const fillGaps = (
       s: lastEnd,
       e: length,
       index: -1,
+      hoverIndex: [gapIndex++],
       overlapped: [],
       isOverlapped: false,
       isGap: true,
@@ -177,7 +196,15 @@ export const splitRangesByLine = (
 ): SplittedByLineTextRange[] => {
   const result: SplittedByLineTextRange[] = [];
 
-  for (const { s, e, index, overlapped, isGap, isOverlapped } of ranges) {
+  for (const {
+    s,
+    e,
+    index,
+    hoverIndex,
+    overlapped,
+    isGap,
+    isOverlapped,
+  } of ranges) {
     const startLineIndex = Math.floor(s / lineLength);
     const endLineIndex = Math.floor(e / lineLength);
 
@@ -195,6 +222,7 @@ export const splitRangesByLine = (
           s: subRangeStart,
           e: subRangeEnd,
           index,
+          hoverIndex,
           overlapped,
           isGap,
           lineNumber: line,

@@ -1,11 +1,70 @@
+import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import { Fragment } from "react/jsx-runtime";
 import {
+  NewTRSContext,
   SplittedByLineTextRange,
   LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 
-import { CursorGhost } from "./Cursor";
+const Part = ({
+  text,
+  part,
+}: {
+  text: string;
+  part: SplittedByLineTextRange;
+}) => {
+  const { hoverObj, setRangeHover } = useContext(NewTRSContext);
+  const [isActivated, setIsActivated] = useState(false);
+
+  const overlapped = part.isOverlapped; // 重叠部分
+  const isOdd = part.index % 2 === 1; // 奇数区域
+  const isEven = part.index % 2 === 0; // 偶数区域
+  const isGap = part.isGap; // 空隙部分
+
+  useEffect(() => {
+    if (
+      !hoverObj.isGap &&
+      !isGap &&
+      part.hoverIndex.includes(hoverObj.rangeIndex[0])
+    ) {
+      setIsActivated(true);
+      return;
+    }
+
+    setIsActivated(false);
+  }, [hoverObj]);
+
+  const onMouseEnter = (
+    index: number[],
+    isGap: boolean,
+    overlapped: boolean
+  ) => {
+    setRangeHover(index, isGap, overlapped);
+  };
+
+  const onMouseOut = () => {
+    setRangeHover([], false, false);
+  };
+
+  return (
+    <span
+      className={clsx(
+        // "text-transparent",
+        "cursor-pointer",
+        isActivated && "bg-yellow-300",
+        !isActivated && overlapped && "bg-gray-300",
+        !isActivated && !overlapped && isEven && "bg-red-300",
+        !isActivated && !overlapped && isOdd && "bg-green-300",
+        !isActivated && isGap && "bg-transparent"
+      )}
+      onMouseEnter={() => onMouseEnter(part.hoverIndex, isGap, overlapped)}
+      onMouseOut={onMouseOut}
+    >
+      {text}
+    </span>
+  );
+};
 
 const BackgroundLayer = ({
   parts,
@@ -22,24 +81,10 @@ const BackgroundLayer = ({
         const _start = part.s - lineIndex * chunkSize;
         const _end = part.e - lineIndex * chunkSize;
         const _partText = text.slice(_start, _end);
-        const overlapped = part.isOverlapped; // 重叠部分
-        const isOdd = part.index % 2 === 1; // 奇数区域
-        const isEven = part.index % 2 === 0; // 偶数区域
-        const isGap = part.isGap; // 空隙部分
 
         return (
           <Fragment key={_index}>
-            <span
-              className={clsx(
-                // "text-transparent",
-                overlapped && "bg-gray-300",
-                !overlapped && isEven && "bg-red-300",
-                !overlapped && isOdd && "bg-green-300",
-                isGap && "bg-transparent"
-              )}
-            >
-              {_partText}
-            </span>
+            <Part text={_partText} part={part} />
           </Fragment>
         );
       })}

@@ -40,9 +40,9 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text }: { text: string }) {
-  const { cursorPositions } = useContext(NewTRSContext);
+  // const { cursorPositions } = useContext(NewTRSContext);
 
-  console.log({ cursorPositions });
+  // console.log({ cursorPositions });
 
   // const onDrop = (pos: CursorPosition, newPos: number) => {
   //   setCursors((prevCursors) => {

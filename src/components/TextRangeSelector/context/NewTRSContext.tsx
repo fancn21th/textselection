@@ -18,11 +18,17 @@ export type NewTRSContextType = {
   textRanges: IndexedOriginTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
+  hoverObj: HoverObj;
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
   setIsDragging: (isDragging: boolean) => void;
+  setRangeHover: (
+    rangeIndex: number[],
+    isGap: boolean,
+    overlapped: boolean
+  ) => void;
 };
 
 export type OriginTextRange = {
@@ -37,6 +43,7 @@ export type IndexedOriginTextRange = OriginTextRange & {
 export type OverlappedTextRange = IndexedOriginTextRange & {
   overlapped: number[];
   isOverlapped: boolean;
+  hoverIndex: number[];
 };
 
 export type GapFilledTextRange = OverlappedTextRange & {
@@ -57,6 +64,12 @@ export type CursorPosition = {
   type: "s" | "e"; // 起点或者是终点
 };
 
+export type HoverObj = {
+  isGap: boolean;
+  rangeIndex: number[];
+  overlapped: boolean;
+};
+
 // 创建 Context
 // TODO: context warning
 export const NewTRSContext = createContext<NewTRSContextType>(
@@ -73,6 +86,11 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
   const [isDragging, _setIsDragging] = useState(false);
+  const [hoverObj, setHoverObj] = useState<HoverObj>({
+    isGap: false,
+    rangeIndex: [],
+    overlapped: false,
+  });
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -122,6 +140,18 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     _setIsDragging(isDragging);
   };
 
+  const setRangeHover = (
+    rangeIndex: number[],
+    isGap: boolean,
+    overlapped: boolean
+  ) => {
+    setHoverObj({
+      rangeIndex,
+      isGap,
+      overlapped,
+    });
+  };
+
   // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
@@ -157,16 +187,18 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     <NewTRSContext.Provider
       value={{
         charCount,
-        setCharCount,
-        setFullText,
-        setTextRanges,
-        setNewLineRange,
         fullText,
         byLine,
         textRanges,
         cursorPositions,
-        setIsDragging,
         isDragging,
+        hoverObj,
+        setCharCount,
+        setFullText,
+        setTextRanges,
+        setNewLineRange,
+        setIsDragging,
+        setRangeHover,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
@@ -174,8 +206,9 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       {createPortal(
         <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
           字符长度: <p>{charCount}</p>
-          分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre>
+          {/* 分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
           正在拖动: <p>{isDragging ? "是" : "否"}</p>
+          Hover: <pre>{JSON.stringify(hoverObj, null, 2)}</pre>
         </div>,
         document.body
       )}
