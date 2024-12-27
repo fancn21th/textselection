@@ -26,6 +26,10 @@ export type GapFilledTextRange = OverlappedTextRange & {
   isGap: boolean;
 };
 
+export type SplittedByLineTextRange = GapFilledTextRange & {
+  lineNumber: number;
+};
+
 // 创建 Context
 // TODO: context warning
 export const NewTRSContext = createContext<NewTRSContextType>(
@@ -37,6 +41,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [charCount, setCharCount] = useState(0);
   const [fullText, _setFullText] = useState("");
   const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]);
+  const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -58,14 +63,19 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
     const overLapped = toOverLappedTextRanges(textRanges);
     // 第二步：填充
-    const gapFilled = fillGaps(overLapped, charCount);
-
-    console.log({ gapFilled });
+    const _gapFilled = fillGaps(overLapped, charCount);
+    setGapFilled(_gapFilled);
   }, [textRanges, charCount]);
+
+  // 窗口的切分计算
+  useEffect(() => {
+    console.log({ gapFilled });
+  }, [gapFilled]);
 
   return (
     <NewTRSContext.Provider

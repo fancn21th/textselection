@@ -30,7 +30,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
     ];
   }, []);
 
-  console.log({ marked });
+  // console.log({ marked });
 
   const overlapped = marked.flatMap<OverlappedTextRange>((current) => {
     // 当前区间同时和前后区间重叠
@@ -101,7 +101,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
     ];
   });
 
-  console.log({ overlapped });
+  // console.log({ overlapped });
 
   // 去掉重复
 
@@ -119,7 +119,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
     return acc;
   }, []);
 
-  console.log({ deduped });
+  // console.log({ deduped });
 
   return deduped;
 };
