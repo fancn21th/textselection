@@ -44,11 +44,13 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text }: { text: string }) {
-  const { setTextRanges, textRanges } = useContext(NewTRSContext);
+  const { setTextRanges, textRanges, setIsDropping } =
+    useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
+    setIsDropping();
     setTextRanges(
-      textRanges.slice().map((range: OriginTextRange, index: number) => {
+      textRanges.map((range: OriginTextRange, index: number) => {
         if (pos.index === index) {
           if (pos.type === "s") {
             return { ...range, s: newPos };

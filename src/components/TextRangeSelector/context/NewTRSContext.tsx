@@ -24,6 +24,7 @@ export type NewTRSContextType = {
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
   setIsDragging: () => void;
+  setIsDropping: () => void;
   setActivatedRange: (
     activatedRangeIndex: number,
     isGap: boolean,
@@ -143,6 +144,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     _setIsDragging(true);
   };
 
+  const setIsDropping = () => {
+    _setIsDragging(false);
+  };
+
   const setActivatedRange = (
     activatedRangeIndex: number,
     isGap: boolean,
@@ -203,6 +208,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setTextRanges,
         setNewLineRange,
         setIsDragging,
+        setIsDropping,
         setActivatedRange,
       }}
     >
