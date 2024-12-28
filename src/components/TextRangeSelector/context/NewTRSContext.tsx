@@ -18,7 +18,7 @@ export type NewTRSContextType = {
   textRanges: IndexedOriginTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
-  hoverObj: HoverObj;
+  activatedObject: ActivatedObject;
   setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
@@ -64,7 +64,7 @@ export type CursorPosition = {
   type: "s" | "e"; // 起点或者是终点
 };
 
-export type HoverObj = {
+export type ActivatedObject = {
   isGap: boolean;
   rangeIndex: number[];
   overlapped: boolean;
@@ -86,7 +86,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
   const [isDragging, _setIsDragging] = useState(false);
-  const [hoverObj, setHoverObj] = useState<HoverObj>({
+  const [activatedObject, setActivatedObject] = useState<ActivatedObject>({
     isGap: false,
     rangeIndex: [],
     overlapped: false,
@@ -145,8 +145,8 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     isGap: boolean,
     overlapped: boolean
   ) => {
-    setHoverObj({
-      ...hoverObj,
+    setActivatedObject({
+      ...activatedObject,
       rangeIndex,
       isGap,
       overlapped,
@@ -193,7 +193,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         textRanges,
         cursorPositions,
         isDragging,
-        hoverObj,
+        activatedObject,
         setCharCount,
         setFullText,
         setTextRanges,
@@ -207,7 +207,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       {createPortal(
         <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
           字符长度: <p>{charCount}</p>
-          激活范围: <pre>{JSON.stringify(hoverObj, null, 2)}</pre>
+          激活范围: <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
           {/* Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
           {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
           正在拖动: <p>{isDragging ? "是" : "否"}</p>

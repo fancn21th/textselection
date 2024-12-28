@@ -14,7 +14,7 @@ const Part = ({
   text: string;
   part: SplittedByLineTextRange;
 }) => {
-  const { hoverObj, setActivatedRange } = useContext(NewTRSContext);
+  const { activatedObject, setActivatedRange } = useContext(NewTRSContext);
   const [isActivated, setIsActivated] = useState(false);
 
   const overlapped = part.isOverlapped; // 重叠部分
@@ -25,9 +25,9 @@ const Part = ({
   useEffect(() => {
     // 非空隙部分，且 hoverIndex 包含当前区域
     if (
-      !hoverObj.isGap &&
+      !activatedObject.isGap &&
       !isGap &&
-      part.hoverIndex.includes(hoverObj.rangeIndex[0])
+      part.hoverIndex.includes(activatedObject.rangeIndex[0])
     ) {
       setIsActivated(true);
       return;
@@ -35,16 +35,16 @@ const Part = ({
 
     // 空隙部分，且 hoverIndex 包含当前区域
     if (
-      hoverObj.isGap &&
+      activatedObject.isGap &&
       isGap &&
-      part.hoverIndex.includes(hoverObj.rangeIndex[0])
+      part.hoverIndex.includes(activatedObject.rangeIndex[0])
     ) {
       setIsActivated(true);
       return;
     }
 
     setIsActivated(false);
-  }, [hoverObj]);
+  }, [activatedObject]);
 
   const highlight = (index: number[], isGap: boolean, overlapped: boolean) => {
     setActivatedRange(index, isGap, overlapped);
