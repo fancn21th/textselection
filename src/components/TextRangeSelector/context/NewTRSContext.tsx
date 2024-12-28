@@ -25,7 +25,7 @@ export type NewTRSContextType = {
   setNewLineRange: (s: number, e: number) => void;
   setIsDragging: (isDragging: boolean) => void;
   setActivatedRange: (
-    rangeIndex: number[],
+    activatedRangeIndex: number,
     isGap: boolean,
     overlapped: boolean
   ) => void;
@@ -67,8 +67,8 @@ export type CursorPosition = {
 
 export type ActivatedObject = {
   status: "idle" | "activated";
+  activatedRangeIndex: number;
   isGap: boolean;
-  rangeIndex: number[];
   overlapped: boolean;
 };
 
@@ -90,7 +90,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [isDragging, _setIsDragging] = useState(false);
   const [activatedObject, setActivatedObject] = useState<ActivatedObject>({
     isGap: false,
-    rangeIndex: [],
+    activatedRangeIndex: -1,
     overlapped: false,
     status: "idle",
   });
@@ -144,13 +144,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const setActivatedRange = (
-    rangeIndex: number[],
+    activatedRangeIndex: number,
     isGap: boolean,
     overlapped: boolean
   ) => {
     setActivatedObject({
       ...activatedObject,
-      rangeIndex,
+      activatedRangeIndex,
       isGap,
       overlapped,
       status: "activated",

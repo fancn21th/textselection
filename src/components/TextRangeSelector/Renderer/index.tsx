@@ -84,7 +84,7 @@ function Text() {
                   <BackgroundLayer
                     parts={parts}
                     lineIndex={index}
-                    text={text}
+                    lineText={text}
                   />
                 )}
               </div>

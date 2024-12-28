@@ -11,10 +11,10 @@ import { CursorGhost } from "./Cursor";
 // part 是 行内的一个区域 是背景渲染的最小单位
 // 一个 range 可能会被分割成多个 part
 const Part = ({
-  text,
+  partText,
   part,
 }: {
-  text: string;
+  partText: string;
   part: SplittedByLineTextRange;
 }) => {
   const { activatedObject, setActivatedRange, cursorPositions } =
@@ -33,7 +33,7 @@ const Part = ({
     if (
       !activatedObject.isGap &&
       !isGap &&
-      part.hoverIndex.includes(activatedObject.rangeIndex[0])
+      part.hoverIndex.includes(activatedObject.activatedRangeIndex)
     ) {
       setIsActivated(true);
       return;
@@ -43,7 +43,7 @@ const Part = ({
     if (
       activatedObject.isGap &&
       isGap &&
-      part.hoverIndex.includes(activatedObject.rangeIndex[0])
+      part.hoverIndex.includes(activatedObject.activatedRangeIndex)
     ) {
       setIsActivated(true);
       return;
@@ -55,23 +55,71 @@ const Part = ({
 
   useEffect(() => {
     if (isActivated) {
-      const head = cursorPositions.find(
-        (cursor) => cursor.pos === part.s && cursor.type === "s"
-      );
-      if (head) {
-        setHeadCursor(head);
-      }
-      const tail = cursorPositions.find(
-        (cursor) => cursor.pos === part.e && cursor.type === "e"
-      );
-      if (tail) {
-        setTailCursor(tail);
+      // 获取触发激活的区域， 如果是重叠 则有两种可能 头部是重叠部分 或者 尾部是重叠部分
+      const { activatedRangeIndex } = activatedObject;
+
+      // part 是 重叠部分
+      if (part.index === -1) {
+        // activatedRangeIndex 比 part.hoverIndex 的最大值小 说明是头部
+        // 重叠部分为头部 则 headCursor 为 s
+        if (activatedRangeIndex < Math.max(...part.hoverIndex)) {
+          const tail = cursorPositions.find(
+            (cursor) => cursor.pos === part.e && cursor.type === "e"
+          );
+          if (tail) {
+            setTailCursor(tail);
+          }
+        } else {
+          const head = cursorPositions.find(
+            (cursor) => cursor.pos === part.s && cursor.type === "s"
+          );
+          if (head) {
+            setHeadCursor(head);
+          }
+        }
+      } else {
+        // part 是 非重叠部分
+
+        // part 和其他 part 有重叠
+        if (part.overlapped && part.overlapped.length > 0) {
+          const head = cursorPositions.find(
+            (cursor) => cursor.pos === part.s && cursor.type === "s"
+          );
+          if (head) {
+            setHeadCursor(head);
+          }
+
+          const tail = cursorPositions.find(
+            (cursor) => cursor.pos === part.e && cursor.type === "e"
+          );
+          if (tail) {
+            setTailCursor(tail);
+          }
+        } else {
+          // part 和其他 part 没有重叠
+          const head = cursorPositions.find(
+            (cursor) => cursor.pos === part.s && cursor.type === "s"
+          );
+          if (head) {
+            setHeadCursor(head);
+          }
+
+          const tail = cursorPositions.find(
+            (cursor) => cursor.pos === part.e && cursor.type === "e"
+          );
+          if (tail) {
+            setTailCursor(tail);
+          }
+        }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActivated]);
 
   const highlight = (index: number[], isGap: boolean, overlapped: boolean) => {
-    setActivatedRange(index, isGap, overlapped);
+    // TODO: 点击重叠的区域靠后的区域被激活
+    const maxIndex = Math.max(...index);
+    setActivatedRange(maxIndex, isGap, overlapped);
   };
 
   return (
@@ -89,7 +137,7 @@ const Part = ({
         )}
         onClick={() => highlight(part.hoverIndex, isGap, overlapped)}
       >
-        {text}
+        {partText}
       </span>
       {tailCursor && <CursorGhost pos={tailCursor} />}
     </>
@@ -99,20 +147,20 @@ const Part = ({
 const BackgroundLayer = ({
   parts,
   lineIndex,
-  text,
+  lineText,
 }: {
   parts: SplittedByLineTextRange[];
   lineIndex: number;
-  text: string;
+  lineText: string;
 }) => {
   return (
     <>
       {parts.map((part, _index) => {
         const _start = part.s - lineIndex * chunkSize;
         const _end = part.e - lineIndex * chunkSize;
-        const _partText = text.slice(_start, _end);
+        const _partText = lineText.slice(_start, _end);
 
-        return <Part key={_index} text={_partText} part={part} />;
+        return <Part key={_index} partText={_partText} part={part} />;
       })}
     </>
   );
