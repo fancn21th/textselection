@@ -16,7 +16,7 @@ function Render({ text }: { text: string }) {
   }, []);
 
   return (
-    <div className="relative w-[900px] h-[600px] border border-red-500 overflow-y-scroll">
+    <div className="relative w-[900px] h-[550px] border border-red-500 overflow-y-scroll">
       <Renderer></Renderer>
     </div>
   );

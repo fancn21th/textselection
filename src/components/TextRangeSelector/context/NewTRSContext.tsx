@@ -23,7 +23,7 @@ export type NewTRSContextType = {
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
-  setIsDragging: (isDragging: boolean) => void;
+  setIsDragging: () => void;
   setActivatedRange: (
     activatedRangeIndex: number,
     isGap: boolean,
@@ -80,9 +80,9 @@ export const NewTRSContext = createContext<NewTRSContextType>(
 
 // 提供 Context 的 Provider
 export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
+  const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]); // SOT
+  const [fullText, _setFullText] = useState(""); // SOT
   const [charCount, setCharCount] = useState(0);
-  const [fullText, _setFullText] = useState("");
-  const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]);
   const [cursorPositions, setCursorPositions] = useState<CursorPosition[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [lineRange, _setLineRange] = useState<LineRange>(null);
@@ -139,8 +139,8 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const setIsDragging = (isDragging: boolean) => {
-    _setIsDragging(isDragging);
+  const setIsDragging = () => {
+    _setIsDragging(true);
   };
 
   const setActivatedRange = (
@@ -172,7 +172,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!lineRange || gapFilled.length === 0) return;
 
-    console.log({ lineRange, gapFilled });
+    // console.log({ lineRange, gapFilled });
 
     // 窗口过滤
 
@@ -206,7 +206,9 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setActivatedRange,
       }}
     >
-      <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+      <DndProvider debugMode={true} backend={HTML5Backend}>
+        {children}
+      </DndProvider>
       {/* debugger */}
       {createPortal(
         <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">

@@ -15,7 +15,12 @@ type ByKey = {
 };
 
 function Text() {
-  const { setNewLineRange, fullText: text, byLine } = useContext(NewTRSContext);
+  const {
+    setNewLineRange,
+    fullText: text,
+    byLine,
+    isDragging,
+  } = useContext(NewTRSContext);
 
   // 跟踪当前可视区域的 chunk 索引
   const [visibleRange, setVisibleRange] = useState({
@@ -46,12 +51,20 @@ function Text() {
 
   console.log({ byLineGroupedByKey });
 
+  // const onMouseEnter = (lineIndex: number) => {
+  //   console.log("lineIndex onMouseEnter", lineIndex);
+  // };
+
+  // const onMouseLeave = (lineIndex: number) => {
+  //   console.log("lineIndex onMouseLeave", lineIndex);
+  // };
+
   return (
     <>
       <List
         height={600} // 父容器高度
         itemCount={chunks.length} // 总块数
-        itemSize={30} // 每行高度
+        itemSize={40} // 每行高度
         width="100%" // 宽度适应父容器
         onItemsRendered={({
           visibleStartIndex,
@@ -73,7 +86,11 @@ function Text() {
           const parts = byLineGroupedByKey[index];
 
           return (
-            <div style={style}>
+            <div
+              style={style}
+              // onMouseEnter={() => onMouseEnter(index)}
+              // onMouseLeave={() => onMouseLeave(index)}
+            >
               {/* text layer */}
               <div className="">
                 <span className={clsx()}>{text}</span>
@@ -89,7 +106,12 @@ function Text() {
                 )}
               </div>
               {/* dnd layer */}
-              <div className={clsx("absolute left-0 top-0")}>
+              <div
+                className={clsx(
+                  "absolute left-0 top-0 ",
+                  !isDragging && "pointer-events-none"
+                )}
+              >
                 <DndLayer text={text} />
               </div>
             </div>

@@ -79,7 +79,6 @@ const Part = ({
         }
       } else {
         // part 是 非重叠部分
-
         // part 和其他 part 有重叠
         if (part.overlapped && part.overlapped.length > 0) {
           const head = cursorPositions.find(

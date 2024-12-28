@@ -17,8 +17,8 @@ export function CursorGhost({ pos }: { pos: CursorPosition }) {
   }));
 
   useEffect(() => {
-    setIsDragging(isDragging);
-  }, [isDragging]);
+    if (isDragging) setIsDragging();
+  }, [isDragging, setIsDragging]);
 
   return (
     <span
