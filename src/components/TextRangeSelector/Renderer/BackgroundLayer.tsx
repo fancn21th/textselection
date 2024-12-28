@@ -56,9 +56,9 @@ const Part = ({
         // "text-transparent",
         "cursor-pointer",
         isActivated && "bg-yellow-300",
-        !isActivated && overlapped && "bg-gray-300",
-        !isActivated && !overlapped && isEven && "bg-red-300",
-        !isActivated && !overlapped && isOdd && "bg-green-300",
+        !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
+        !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
+        !isActivated && overlapped && "bg-gray-300", //  重叠部分
         !isActivated && isGap && "bg-transparent"
       )}
       onClick={() => highlight(part.hoverIndex, isGap, overlapped)}
