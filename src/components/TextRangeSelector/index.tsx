@@ -1,23 +1,22 @@
 import { useContext, useEffect } from "react";
-import {
-  TextRangeSelectionContext,
-  TextRangeSelectionProvider,
-} from "./context/TextRangeSelectionContext";
-import TextRender from "./TextRender";
-import BackgroundRender from "./BackgroundRender";
-import DragnDropRender from "./DragnDropRender";
+import TextRender from "./Renderer";
+import { NewTRSContext, NewTRSProvider } from "./context/NewTRSContext";
 
 function Render({ text }: { text: string }) {
-  const { setText } = useContext(TextRangeSelectionContext);
+  const { setFullText, setTextRanges } = useContext(NewTRSContext);
 
   useEffect(() => {
-    setText(text);
+    setFullText(text);
+    setTextRanges([
+      { s: 0, e: 10 },
+      { s: 5, e: 20 },
+      { s: 15, e: 51 },
+      { s: 1000, e: 1100 },
+    ]);
   }, []);
 
   return (
-    <div className="relative w-[800px]">
-      <DragnDropRender></DragnDropRender>
-      <BackgroundRender></BackgroundRender>
+    <div className="relative w-[800px] h-[600px] border border-red-500 overflow-y-scroll">
       <TextRender></TextRender>
     </div>
   );
@@ -25,9 +24,9 @@ function Render({ text }: { text: string }) {
 
 function TextRangeSelector({ text }: { text: string }) {
   return (
-    <TextRangeSelectionProvider>
+    <NewTRSProvider>
       <Render text={text}></Render>
-    </TextRangeSelectionProvider>
+    </NewTRSProvider>
   );
 }
 
