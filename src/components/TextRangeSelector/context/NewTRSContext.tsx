@@ -65,6 +65,7 @@ export type CursorPosition = {
 };
 
 export type ActivatedObject = {
+  status: "idle" | "activated";
   isGap: boolean;
   rangeIndex: number[];
   overlapped: boolean;
@@ -90,6 +91,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     isGap: false,
     rangeIndex: [],
     overlapped: false,
+    status: "idle",
   });
 
   // wrapper for setFullText
@@ -150,6 +152,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       rangeIndex,
       isGap,
       overlapped,
+      status: "activated",
     });
   };
 
