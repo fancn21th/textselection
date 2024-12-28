@@ -62,6 +62,7 @@ export type LineRange = {
 export type CursorPosition = {
   pos: number; // 坐标
   type: "s" | "e"; // 起点或者是终点
+  index: number; // 索引
 };
 
 export type ActivatedObject = {

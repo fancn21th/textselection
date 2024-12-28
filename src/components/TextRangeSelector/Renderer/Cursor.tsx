@@ -1,18 +1,9 @@
 import { useContext, useEffect } from "react";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
-import { NewTRSContext } from "../context/NewTRSContext";
+import { CursorPosition, NewTRSContext } from "../context/NewTRSContext";
 
-const predefinedColors = [
-  "text-red-500",
-  "text-blue-500",
-  "text-green-500",
-  "text-yellow-500",
-  "text-purple-500",
-  "text-pink-500",
-];
-
-export function CursorGhost({ pos }: { pos: { index: number } }) {
+export function CursorGhost({ pos }: { pos: CursorPosition }) {
   const { setIsDragging } = useContext(NewTRSContext);
 
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -33,9 +24,8 @@ export function CursorGhost({ pos }: { pos: { index: number } }) {
     <span
       className={clsx(
         // "text-transparent",
-        "font-extrabold",
+        "font-extrabold text-pink-500",
         "absolute z-50 cursor-move",
-        predefinedColors[pos.index % predefinedColors.length],
         isDragging && "opacity-50"
       )}
       ref={drag}
