@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import TextRender from "./Renderer";
+import Renderer from "./Renderer";
 import { NewTRSContext, NewTRSProvider } from "./context/NewTRSContext";
 
 function Render({ text }: { text: string }) {
@@ -16,8 +16,8 @@ function Render({ text }: { text: string }) {
   }, []);
 
   return (
-    <div className="relative w-[800px] h-[600px] border border-red-500 overflow-y-scroll">
-      <TextRender></TextRender>
+    <div className="relative w-[900px] h-[600px] border border-red-500 overflow-y-scroll">
+      <Renderer></Renderer>
     </div>
   );
 }

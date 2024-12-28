@@ -14,7 +14,7 @@ const Part = ({
   text: string;
   part: SplittedByLineTextRange;
 }) => {
-  const { hoverObj, setRangeHover } = useContext(NewTRSContext);
+  const { hoverObj, setActivatedRange } = useContext(NewTRSContext);
   const [isActivated, setIsActivated] = useState(false);
 
   const overlapped = part.isOverlapped; // 重叠部分
@@ -47,7 +47,7 @@ const Part = ({
   }, [hoverObj]);
 
   const highlight = (index: number[], isGap: boolean, overlapped: boolean) => {
-    setRangeHover(index, isGap, overlapped);
+    setActivatedRange(index, isGap, overlapped);
   };
 
   return (

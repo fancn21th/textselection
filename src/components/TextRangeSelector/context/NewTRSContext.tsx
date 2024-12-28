@@ -24,7 +24,7 @@ export type NewTRSContextType = {
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
   setIsDragging: (isDragging: boolean) => void;
-  setRangeHover: (
+  setActivatedRange: (
     rangeIndex: number[],
     isGap: boolean,
     overlapped: boolean
@@ -140,12 +140,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     _setIsDragging(isDragging);
   };
 
-  const setRangeHover = (
+  const setActivatedRange = (
     rangeIndex: number[],
     isGap: boolean,
     overlapped: boolean
   ) => {
     setHoverObj({
+      ...hoverObj,
       rangeIndex,
       isGap,
       overlapped,
@@ -198,7 +199,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setTextRanges,
         setNewLineRange,
         setIsDragging,
-        setRangeHover,
+        setActivatedRange,
       }}
     >
       <DndProvider backend={HTML5Backend}>{children}</DndProvider>
@@ -206,9 +207,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       {createPortal(
         <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
           字符长度: <p>{charCount}</p>
-          {/* 分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
-          正在拖动: <p>{isDragging ? "是" : "否"}</p>
           激活范围: <pre>{JSON.stringify(hoverObj, null, 2)}</pre>
+          {/* Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
+          {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
+          正在拖动: <p>{isDragging ? "是" : "否"}</p>
         </div>,
         document.body
       )}
