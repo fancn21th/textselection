@@ -34,7 +34,7 @@ function Text() {
 
   // byLine 转换
 
-  const byLineByKey = useMemo(() => {
+  const byLineGroupedByKey = useMemo(() => {
     return byLine.reduce<ByKey>((acc, cur) => {
       if (!acc[cur.lineNumber]) {
         acc[cur.lineNumber] = [];
@@ -44,7 +44,7 @@ function Text() {
     }, {});
   }, [byLine]);
 
-  console.log({ byLineByKey });
+  console.log({ byLineGroupedByKey });
 
   return (
     <>
@@ -70,7 +70,7 @@ function Text() {
       >
         {({ index, style }: { index: number; style: React.CSSProperties }) => {
           const text = chunks[index];
-          const parts = byLineByKey[index];
+          const parts = byLineGroupedByKey[index];
 
           return (
             <div style={style}>

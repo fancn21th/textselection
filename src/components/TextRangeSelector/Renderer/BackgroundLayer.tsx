@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
-import { Fragment } from "react/jsx-runtime";
 import {
   NewTRSContext,
   SplittedByLineTextRange,
   LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 
+// part 是 行内的一个区域 是背景渲染的最小单位
+// 一个 range 可能会被分割成多个 part
 const Part = ({
   text,
   part,
@@ -55,11 +56,11 @@ const Part = ({
       className={clsx(
         // "text-transparent",
         "cursor-pointer",
-        isActivated && "bg-yellow-300",
+        isActivated && "bg-yellow-300", // 激活状态
         !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
         !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
         !isActivated && overlapped && "bg-gray-300", //  重叠部分
-        !isActivated && isGap && "bg-transparent"
+        !isActivated && isGap && "bg-transparent" //  空隙部分
       )}
       onClick={() => highlight(part.hoverIndex, isGap, overlapped)}
     >
@@ -84,11 +85,7 @@ const BackgroundLayer = ({
         const _end = part.e - lineIndex * chunkSize;
         const _partText = text.slice(_start, _end);
 
-        return (
-          <Fragment key={_index}>
-            <Part text={_partText} part={part} />
-          </Fragment>
-        );
+        return <Part key={_index} text={_partText} part={part} />;
       })}
     </>
   );
