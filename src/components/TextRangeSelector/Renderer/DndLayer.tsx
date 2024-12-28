@@ -45,7 +45,8 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text, lineIndex }: { text: string; lineIndex: number }) {
-  const { setTextRanges, setIsDropping } = useContext(NewTRSContext);
+  const { setTextRanges, setIsDropping, isDragging } =
+    useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     const p = newPos + lineIndex * LineCharCount;
@@ -67,11 +68,13 @@ function DndLayer({ text, lineIndex }: { text: string; lineIndex: number }) {
 
   return (
     <>
-      {text.split(splitter).map((char, index) => (
-        <Char key={index} index={index} onDrop={onDrop}>
-          {char}
-        </Char>
-      ))}
+      {isDragging
+        ? text.split(splitter).map((char, index) => (
+            <Char key={index} index={index} onDrop={onDrop}>
+              {char}
+            </Char>
+          ))
+        : null}
     </>
   );
 }
