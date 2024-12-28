@@ -44,13 +44,12 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text }: { text: string }) {
-  const { setTextRanges, textRanges, setIsDropping } =
-    useContext(NewTRSContext);
+  const { setTextRanges, setIsDropping } = useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setIsDropping();
-    setTextRanges(
-      textRanges.map((range: OriginTextRange, index: number) => {
+    setTextRanges((pre: OriginTextRange[]) => {
+      const newRanges = pre.map((range: OriginTextRange, index: number) => {
         if (pos.index === index) {
           if (pos.type === "s") {
             return { ...range, s: newPos };
@@ -60,8 +59,9 @@ function DndLayer({ text }: { text: string }) {
           }
         }
         return range;
-      })
-    );
+      });
+      return newRanges;
+    });
   };
 
   return (

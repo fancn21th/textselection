@@ -8,9 +8,9 @@ function Render({ text }: { text: string }) {
   useEffect(() => {
     setFullText(text);
     setTextRanges([
-      { s: 0, e: 10 },
-      { s: 5, e: 20 },
-      { s: 15, e: 38 },
+      { s: 0, e: 20 },
+      { s: 15, e: 30 },
+      // { s: 15, e: 38 },
       // { s: 1000, e: 1100 },
     ]);
   }, []);

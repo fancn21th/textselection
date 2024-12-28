@@ -15,7 +15,6 @@ export type NewTRSContextType = {
   fullText: string;
   charCount: number;
   byLine: SplittedByLineTextRange[];
-  textRanges: IndexedOriginTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
   activatedObject: ActivatedObject;
@@ -81,8 +80,11 @@ export const NewTRSContext = createContext<NewTRSContextType>(
 
 // 提供 Context 的 Provider
 export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
-  const [textRanges, _setTextRanges] = useState<IndexedOriginTextRange[]>([]); // SOT
+  const [textRanges, setTextRanges] = useState<OriginTextRange[]>([]); // SOT
   const [fullText, _setFullText] = useState(""); // SOT
+  const [internalTextRanges, setInternalTextRanges] = useState<
+    IndexedOriginTextRange[]
+  >([]);
   const [charCount, setCharCount] = useState(0);
   const [cursorPositions, setCursorPositions] = useState<CursorPosition[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
@@ -102,9 +104,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     setCharCount(text.length);
   };
 
-  const setTextRanges = (ranges: OriginTextRange[]) => {
+  // 计算派生状态
+  useEffect(() => {
     // sorted by start position
-    const sorted = ranges.slice().sort((a, b) => a.s - b.s);
+    const sorted = textRanges.slice().sort((a, b) => a.s - b.s);
 
     setCursorPositions(
       sorted.slice().flatMap<CursorPosition>((range, index) => {
@@ -123,7 +126,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    _setTextRanges(
+    setInternalTextRanges(
       sorted.map((range, index) => {
         return {
           ...range,
@@ -131,7 +134,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         };
       })
     );
-  };
+  }, [textRanges]);
 
   const setNewLineRange = (s: number, e: number) => {
     _setLineRange({
@@ -165,13 +168,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   // 整个文本的切分计算
   useEffect(() => {
     // 第一步：将区间按重叠切割
-    const overLapped = toOverLappedTextRanges(Array.from(textRanges));
+    const overLapped = toOverLappedTextRanges(Array.from(internalTextRanges));
     // console.log({ overLapped });
     // 第二步：填充
     const _gapFilled = fillGaps(overLapped, charCount);
     // console.log({ _gapFilled });
     setGapFilled(_gapFilled);
-  }, [textRanges, charCount]);
+  }, [internalTextRanges, charCount]);
 
   // 窗口的切分计算
   useEffect(() => {
@@ -199,7 +202,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         charCount,
         fullText,
         byLine,
-        textRanges,
         cursorPositions,
         isDragging,
         activatedObject,
@@ -220,7 +222,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
           字符长度: <p>{charCount}</p>
           激活范围: <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
-          {/* Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre> */}
+          Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre>
           {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
           正在拖动: <p>{isDragging ? "是" : "否"}</p>
         </div>,
