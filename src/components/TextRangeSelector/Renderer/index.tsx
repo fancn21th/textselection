@@ -112,7 +112,7 @@ function Text() {
                   !isDragging && "pointer-events-none"
                 )}
               >
-                <DndLayer text={text} />
+                <DndLayer text={text} lineIndex={index} />
               </div>
             </div>
           );
