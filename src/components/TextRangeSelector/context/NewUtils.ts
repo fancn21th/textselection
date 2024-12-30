@@ -240,3 +240,31 @@ export const splitRangesByLine = (
 
   return result;
 };
+
+export function splitTextByIndices(text: string, splitter: number[]): string[] {
+  // 确保索引是从小到大排序的
+  // const sortedSplitter = [...splitter].sort((a, b) => a - b);
+
+  const result = [];
+  let start = 0;
+
+  // 遍历索引数组
+  for (const index of splitter) {
+    result.push(text.slice(start, index + 1)); // 将当前片段加入结果
+    start = index + 1; // 更新起始位置
+  }
+
+  // 添加最后的片段
+  result.push(text.slice(start));
+
+  return result;
+}
+
+export const splitByChunkSize = (text: string, chunkSize: number): string[] => {
+  return Array.from(
+    { length: Math.ceil(text.length / chunkSize) },
+    (_, index) => {
+      return text.slice(index * chunkSize, (index + 1) * chunkSize);
+    }
+  );
+};

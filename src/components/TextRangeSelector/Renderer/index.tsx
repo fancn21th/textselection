@@ -8,6 +8,7 @@ import { FixedSizeList as List } from "react-window";
 import clsx from "clsx";
 import DndLayer from "./DndLayer";
 import BackgroundLayer from "./BackgroundLayer";
+import { splitByChunkSize, splitTextByIndices } from "../context/NewUtils";
 
 type ByKey = {
   [key: number]: SplittedByLineTextRange[];
@@ -24,11 +25,18 @@ function Text() {
 
   // 分块文本
   const chunks = useMemo(() => {
-    const result = [];
-    for (let i = 0; i < text.length; i += chunkSize) {
-      result.push(text.slice(i, i + chunkSize));
-    }
-    return result;
+    if (!text) return [];
+    const BreakReg = /(\r\n|\r|\n)/g;
+    const matches = [...text.matchAll(BreakReg)];
+    const brokenLines = splitTextByIndices(
+      text,
+      matches.map((m) => m.index)
+    );
+    const chunks = brokenLines.flatMap((brokenLine) =>
+      splitByChunkSize(brokenLine, chunkSize)
+    );
+    console.log({ chunks });
+    return chunks;
   }, [text]);
 
   // byLine 转换
