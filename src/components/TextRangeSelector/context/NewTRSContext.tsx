@@ -17,7 +17,6 @@ export type NewTRSContextType = {
   isDragging: boolean;
   cursorPositions: CursorPosition[];
   activatedObject: ActivatedObject;
-  setCharCount: (count: number) => void;
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
@@ -210,14 +209,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         cursorPositions, // 光标位置
         isDragging, // 是否正在拖动
         activatedObject, // 激活对象
-        setCharCount,
-        setFullText,
-        setTextRanges,
-        setNewLineRange,
-        setIsDragging,
-        setIsDropping,
-        setActivatedRange,
-        setVisibleRange,
+        setFullText, // 设置全文文本
+        setTextRanges, // 设置文本区间 SOT
+        setNewLineRange, // 设置新的行区间
+        setIsDragging, // 设置正在拖动
+        setIsDropping, // 设置正在放置
+        setActivatedRange, // 设置激活区间
+        setVisibleRange, // 设置可视区间
       }}
     >
       <DndProvider debugMode={true} backend={HTML5Backend}>
