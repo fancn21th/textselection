@@ -13,6 +13,9 @@ type Marked = IndexedOriginTextRange & {
 };
 
 export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
+  // console.log({ ranges });
+
+  // 计算重叠区域 打标记
   const marked = ranges.reduce<Marked[]>((acc, current, index) => {
     if (index > 0) {
       const last = acc[index - 1];
@@ -33,6 +36,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
 
   // console.log({ marked });
 
+  // 重叠区域拆分
   const overlapped = marked.flatMap<OverlappedTextRange>((current) => {
     // 当前区间同时和前后区间重叠
     if (current.headOverlappedPos && current.tailOverlappedPos) {
@@ -124,7 +128,6 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
   // console.log({ overlapped });
 
   // 去掉重复
-
   const deduped = overlapped.reduce<OverlappedTextRange[]>((acc, current) => {
     const last = acc[acc.length - 1];
     if (last && last.s === current.s && last.e === current.e) {
@@ -188,6 +191,7 @@ export const fillGaps = (
   return gapFilled;
 };
 
+// split the ranges by line
 export const splitRangesByLine = (
   ranges: GapFilledTextRange[],
   lineLength: number,
@@ -195,6 +199,8 @@ export const splitRangesByLine = (
   endLine: number
 ): SplittedByLineTextRange[] => {
   const result: SplittedByLineTextRange[] = [];
+
+  console.log({ ranges });
 
   for (const {
     s,

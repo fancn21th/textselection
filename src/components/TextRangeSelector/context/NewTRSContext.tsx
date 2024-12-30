@@ -13,7 +13,6 @@ export const LineCharCount = 50;
 // Types for context value
 export type NewTRSContextType = {
   fullText: string;
-  charCount: number;
   byLine: SplittedByLineTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
@@ -29,6 +28,7 @@ export type NewTRSContextType = {
     isGap: boolean,
     overlapped: boolean
   ) => void;
+  setVisibleRange: (range: { startIndex: number; endIndex: number }) => void;
 };
 
 export type OriginTextRange = {
@@ -82,6 +82,12 @@ export const NewTRSContext = createContext<NewTRSContextType>(
 export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [textRanges, setTextRanges] = useState<OriginTextRange[]>([]); // SOT
   const [fullText, _setFullText] = useState(""); // SOT
+
+  // 跟踪当前可视区域的 chunk 索引
+  const [visibleRange, setVisibleRange] = useState({
+    startIndex: 0,
+    endIndex: 0,
+  });
   const [internalTextRanges, setInternalTextRanges] = useState<
     IndexedOriginTextRange[]
   >([]);
@@ -167,6 +173,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
 
   // 整个文本的切分计算
   useEffect(() => {
+    if (internalTextRanges.length === 0 || charCount === 0) return;
     // 第一步：将区间按重叠切割
     const overLapped = toOverLappedTextRanges(Array.from(internalTextRanges));
     // console.log({ overLapped });
@@ -183,7 +190,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     // console.log({ lineRange, gapFilled });
 
     // 窗口过滤
-
     const _byLine = splitRangesByLine(
       gapFilled,
       LineCharCount,
@@ -191,7 +197,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       lineRange.e
     );
 
-    console.log({ _byLine });
+    // console.log({ _byLine });
 
     setByLine(_byLine);
   }, [gapFilled, lineRange]);
@@ -199,12 +205,11 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   return (
     <NewTRSContext.Provider
       value={{
-        charCount,
-        fullText,
-        byLine,
-        cursorPositions,
-        isDragging,
-        activatedObject,
+        fullText, // 全文文本
+        byLine, // 按行切分的文本
+        cursorPositions, // 光标位置
+        isDragging, // 是否正在拖动
+        activatedObject, // 激活对象
         setCharCount,
         setFullText,
         setTextRanges,
@@ -212,6 +217,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setIsDragging,
         setIsDropping,
         setActivatedRange,
+        setVisibleRange,
       }}
     >
       <DndProvider debugMode={true} backend={HTML5Backend}>
@@ -225,6 +231,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
           Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre>
           {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
           正在拖动: <p>{isDragging ? "是" : "否"}</p>
+          Visible Range:
+          <p>
+            Start: {visibleRange.startIndex} / End: {visibleRange.endIndex}
+          </p>
         </div>,
         document.body
       )}

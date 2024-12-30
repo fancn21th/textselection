@@ -1,11 +1,10 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import {
   NewTRSContext,
   SplittedByLineTextRange,
   LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 import { FixedSizeList as List } from "react-window";
-import { createPortal } from "react-dom";
 import clsx from "clsx";
 import DndLayer from "./DndLayer";
 import BackgroundLayer from "./BackgroundLayer";
@@ -20,13 +19,8 @@ function Text() {
     fullText: text,
     byLine,
     isDragging,
+    setVisibleRange,
   } = useContext(NewTRSContext);
-
-  // 跟踪当前可视区域的 chunk 索引
-  const [visibleRange, setVisibleRange] = useState({
-    startIndex: 0,
-    endIndex: 0,
-  });
 
   // 分块文本
   const chunks = useMemo(() => {
@@ -49,7 +43,7 @@ function Text() {
     }, {});
   }, [byLine]);
 
-  console.log({ byLineGroupedByKey });
+  // console.log({ byLineGroupedByKey });
 
   // const onMouseEnter = (lineIndex: number) => {
   //   console.log("lineIndex onMouseEnter", lineIndex);
@@ -118,15 +112,6 @@ function Text() {
           );
         }}
       </List>
-      {/* debugger */}
-      {createPortal(
-        <div className="absolute right-0 bottom-0 bg-gray-100 p-2 text-sm">
-          <p>Visible Range:</p>
-          <p>Start: {visibleRange.startIndex}</p>
-          <p>End: {visibleRange.endIndex}</p>
-        </div>,
-        document.body
-      )}
     </>
   );
 }
