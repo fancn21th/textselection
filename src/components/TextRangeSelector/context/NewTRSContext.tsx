@@ -1,22 +1,25 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import {
   fillGaps,
+  splitByChunkSize,
   splitRangesByLine,
+  splitTextByIndices,
   toOverLappedTextRanges,
 } from "./NewUtils";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { createPortal } from "react-dom";
 
+// TODO: Moving to config
 export const LineCharCount = 50;
 
 // Types for context value
 export type NewTRSContextType = {
-  fullText: string;
   byLine: SplittedByLineTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
   activatedObject: ActivatedObject;
+  chunks: string[];
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
@@ -51,6 +54,7 @@ export type GapFilledTextRange = OverlappedTextRange & {
 
 export type SplittedByLineTextRange = GapFilledTextRange & {
   lineNumber: number;
+  text: string;
 };
 
 export type LineRange = {
@@ -71,6 +75,9 @@ export type ActivatedObject = {
   overlapped: boolean;
 };
 
+// constants
+const BreakRegex = /(\r\n|\r|\n)/g;
+
 // 创建 Context
 // TODO: context warning
 export const NewTRSContext = createContext<NewTRSContextType>(
@@ -80,13 +87,14 @@ export const NewTRSContext = createContext<NewTRSContextType>(
 // 提供 Context 的 Provider
 export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [textRanges, setTextRanges] = useState<OriginTextRange[]>([]); // SOT
-  const [fullText, _setFullText] = useState(""); // SOT
+  const [chunks, setChunks] = useState<string[]>([]); // SOT
 
   // 跟踪当前可视区域的 chunk 索引
   const [visibleRange, setVisibleRange] = useState({
     startIndex: 0,
     endIndex: 0,
   });
+  // 按换行符切分的文本
   const [internalTextRanges, setInternalTextRanges] = useState<
     IndexedOriginTextRange[]
   >([]);
@@ -105,8 +113,16 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
-    _setFullText(text);
     setCharCount(text.length);
+    const matches = [...text.matchAll(BreakRegex)];
+    const brokenLines = splitTextByIndices(
+      text,
+      matches.map((m) => m.index)
+    );
+    const _chunks = brokenLines.flatMap((brokenLine) =>
+      splitByChunkSize(brokenLine, LineCharCount)
+    );
+    setChunks(_chunks);
   };
 
   // 计算派生状态
@@ -191,12 +207,12 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     // 窗口过滤
     const _byLine = splitRangesByLine(
       gapFilled,
-      LineCharCount,
-      lineRange.s,
-      lineRange.e
+      chunks,
+      Math.floor(lineRange.s),
+      Math.floor(lineRange.e)
     );
 
-    // console.log({ _byLine });
+    console.log({ _byLine });
 
     setByLine(_byLine);
   }, [gapFilled, lineRange]);
@@ -204,7 +220,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   return (
     <NewTRSContext.Provider
       value={{
-        fullText, // 全文文本
+        chunks, // 换行符分块文本
         byLine, // 按行切分的文本
         cursorPositions, // 光标位置
         isDragging, // 是否正在拖动

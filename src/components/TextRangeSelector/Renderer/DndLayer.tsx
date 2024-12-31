@@ -6,7 +6,6 @@ import {
   CursorPosition,
   NewTRSContext,
   OriginTextRange,
-  LineCharCount,
 } from "../context/NewTRSContext";
 
 const splitter = "";
@@ -44,21 +43,20 @@ function Char({
 }
 
 // TODO: 性能优化
-function DndLayer({ text, lineIndex }: { text: string; lineIndex: number }) {
+function DndLayer({ text, startPos }: { text: string; startPos: number }) {
   const { setTextRanges, setIsDropping, isDragging } =
     useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
-    const p = newPos + lineIndex * LineCharCount;
     setIsDropping();
     setTextRanges((pre: OriginTextRange[]) => {
       return pre.map((range: OriginTextRange, index: number) => {
         if (pos.index === index) {
           if (pos.type === "s") {
-            return { ...range, s: p };
+            return { ...range, s: newPos };
           }
           if (pos.type === "e") {
-            return { ...range, e: p };
+            return { ...range, e: newPos };
           }
         }
         return range;
@@ -70,7 +68,7 @@ function DndLayer({ text, lineIndex }: { text: string; lineIndex: number }) {
     <>
       {isDragging
         ? text.split(splitter).map((char, index) => (
-            <Char key={index} index={index} onDrop={onDrop}>
+            <Char key={index} index={index + startPos} onDrop={onDrop}>
               {char}
             </Char>
           ))
