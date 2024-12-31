@@ -239,14 +239,27 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       </DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="absolute top-0 right-0 bg-gray-100 p-2 text-sm">
-          字符长度: <p>{charCount}</p>
-          激活范围: <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
-          Range分段: <pre>{JSON.stringify(textRanges, null, 2)}</pre>
-          {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
-          正在拖动: <p>{isDragging ? "是" : "否"}</p>
-          Visible Range:
+        <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[200px] overflow-y-scroll">
           <p>
+            <h5>字符长度:</h5>
+            {charCount}
+          </p>
+          <p>
+            <h5>激活范围:</h5>
+            <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
+          </p>
+          <p>
+            <h5>Range分段:</h5>
+            <pre>{JSON.stringify(textRanges, null, 2)}</pre>
+          </p>
+
+          {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
+          <p>
+            <h5>正在拖动:</h5>
+            {isDragging ? "是" : "否"}
+          </p>
+          <p>
+            <h5>可见行范围:</h5>
             Start: {visibleRange.startIndex} / End: {visibleRange.endIndex}
           </p>
         </div>,

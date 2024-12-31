@@ -16,8 +16,13 @@ function Render({ text }: { text: string }) {
   }, []);
 
   return (
-    <div className="relative w-[900px] h-[550px] border border-red-500 overflow-y-scroll">
-      <Renderer></Renderer>
+    <div className="flex gap-1">
+      <div className="w-[900px] h-[550px] border border-red-500 overflow-y-scroll">
+        <Renderer></Renderer>
+      </div>
+      <div className="flex-1 h-[550px] border border-blue-500 overflow-y-scroll">
+        <pre>{text}</pre>
+      </div>
     </div>
   );
 }
