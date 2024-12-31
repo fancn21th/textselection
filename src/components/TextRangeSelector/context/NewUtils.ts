@@ -194,49 +194,95 @@ export const fillGaps = (
 // split the ranges by line
 export const splitRangesByLine = (
   ranges: GapFilledTextRange[],
-  lineLength: number,
+  chunks: string[],
   startLine: number,
   endLine: number
 ): SplittedByLineTextRange[] => {
-  const result: SplittedByLineTextRange[] = [];
+  let pos = 0;
 
-  console.log({ ranges });
+  const chunksWithRange: {
+    start: number;
+    end: number;
+    text: string;
+    index: number;
+  }[] = [];
 
-  for (const {
-    s,
-    e,
-    index,
-    hoverIndex,
-    overlapped,
-    isGap,
-    isOverlapped,
-  } of ranges) {
-    const startLineIndex = Math.floor(s / lineLength);
-    const endLineIndex = Math.floor(e / lineLength);
-
-    for (let line = startLineIndex; line <= endLineIndex; line++) {
-      const lineStart = line * lineLength;
-      const lineEnd = (line + 1) * lineLength;
-
-      // 计算子范围
-      const subRangeStart = Math.max(s, lineStart);
-      const subRangeEnd = Math.min(e, lineEnd);
-
-      // 确保范围有效且在窗口范围内
-      if (subRangeStart < subRangeEnd && line >= startLine && line < endLine) {
-        result.push({
-          s: subRangeStart,
-          e: subRangeEnd,
-          index,
-          hoverIndex,
-          overlapped,
-          isGap,
-          lineNumber: line,
-          isOverlapped,
-        });
-      }
+  chunks.forEach((chunk, index) => {
+    const start = pos;
+    pos += chunk.length;
+    if (index >= startLine && index < endLine) {
+      chunksWithRange.push({ start, end: pos, text: chunk, index });
     }
-  }
+  });
+
+  const calculateSegmentIntersection = (
+    range: GapFilledTextRange,
+    chunk: (typeof chunksWithRange)[number]
+  ) => {
+    const { s, e } = range;
+    const { start, end } = chunk;
+
+    if (e <= start || s >= end) return null;
+    return { segmentStart: Math.max(s, start), segmentEnd: Math.min(e, end) };
+  };
+
+  const result: SplittedByLineTextRange[] = ranges
+    .filter(
+      (range) =>
+        range.s < chunksWithRange[chunksWithRange.length - 1].end &&
+        range.e > chunksWithRange[0].start
+    )
+    .flatMap((range) =>
+      chunksWithRange.map((chunk) => {
+        const intersection = calculateSegmentIntersection(range, chunk);
+        if (!intersection) return null;
+
+        const { segmentStart, segmentEnd } = intersection;
+        return {
+          s: segmentStart,
+          e: segmentEnd,
+          index: range.index,
+          hoverIndex: range.hoverIndex,
+          overlapped: range.overlapped,
+          isGap: range.isGap,
+          lineNumber: chunk.index,
+          isOverlapped: range.isOverlapped,
+          text: chunk.text.slice(
+            segmentStart - chunk.start,
+            segmentEnd - chunk.start
+          ),
+        };
+      })
+    )
+    .filter((item): item is SplittedByLineTextRange => item !== null);
 
   return result;
+};
+
+export function splitTextByIndices(text: string, splitter: number[]): string[] {
+  // 确保索引是从小到大排序的
+  // const sortedSplitter = [...splitter].sort((a, b) => a - b);
+
+  const result = [];
+  let start = 0;
+
+  // 遍历索引数组
+  for (const index of splitter) {
+    result.push(text.slice(start, index + 1)); // 将当前片段加入结果
+    start = index + 1; // 更新起始位置
+  }
+
+  // 添加最后的片段
+  result.push(text.slice(start));
+
+  return result;
+}
+
+export const splitByChunkSize = (text: string, chunkSize: number): string[] => {
+  return Array.from(
+    { length: Math.ceil(text.length / chunkSize) },
+    (_, index) => {
+      return text.slice(index * chunkSize, (index + 1) * chunkSize);
+    }
+  );
 };

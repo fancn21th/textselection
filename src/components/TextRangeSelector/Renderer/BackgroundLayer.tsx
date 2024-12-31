@@ -4,7 +4,6 @@ import {
   CursorPosition,
   NewTRSContext,
   SplittedByLineTextRange,
-  LineCharCount as chunkSize,
 } from "../context/NewTRSContext";
 import { CursorGhost } from "./Cursor";
 
@@ -143,23 +142,11 @@ const Part = ({
   );
 };
 
-const BackgroundLayer = ({
-  parts,
-  lineIndex,
-  lineText,
-}: {
-  parts: SplittedByLineTextRange[];
-  lineIndex: number;
-  lineText: string;
-}) => {
+const BackgroundLayer = ({ parts }: { parts: SplittedByLineTextRange[] }) => {
   return (
     <>
       {parts.map((part, _index) => {
-        const _start = part.s - lineIndex * chunkSize;
-        const _end = part.e - lineIndex * chunkSize;
-        const _partText = lineText.slice(_start, _end);
-
-        return <Part key={_index} partText={_partText} part={part} />;
+        return <Part key={_index} partText={part.text} part={part} />;
       })}
     </>
   );
