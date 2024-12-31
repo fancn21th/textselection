@@ -212,7 +212,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       Math.floor(lineRange.e)
     );
 
-    console.log({ _byLine });
+    // console.log({ _byLine });
 
     setByLine(_byLine);
   }, [gapFilled, lineRange]);
