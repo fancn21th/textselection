@@ -18,19 +18,16 @@ export type NewTRSContextType = {
   byLine: SplittedByLineTextRange[];
   isDragging: boolean;
   cursorPositions: CursorPosition[];
-  activatedObject: ActivatedObject;
+  activatedObject: SplittedByLineTextRange | null;
   chunks: string[];
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
   setIsDragging: () => void;
   setIsDropping: () => void;
-  setActivatedRange: (
-    activatedRangeIndex: number,
-    isGap: boolean,
-    overlapped: boolean
-  ) => void;
+  setActivatedRange: (active: SplittedByLineTextRange | null) => void;
   setVisibleRange: (range: { startIndex: number; endIndex: number }) => void;
+  setDraggingObject: (obj: DraggingObjectType) => void;
 };
 
 export type OriginTextRange = {
@@ -39,17 +36,19 @@ export type OriginTextRange = {
 };
 
 export type IndexedOriginTextRange = OriginTextRange & {
-  index: number;
+  index: number; // 文本范围的索引 不包含空隙部分
 };
 
 export type OverlappedTextRange = IndexedOriginTextRange & {
   overlapped: number[];
   isOverlapped: boolean;
-  hoverIndex: number[];
+  hoverIndex: number[]; // 当 cursor 拖动的时候 当前区域 是否需要激活
 };
 
 export type GapFilledTextRange = OverlappedTextRange & {
   isGap: boolean;
+  gapIndex: number; // 空隙部分的索引
+  overallIndex: number; // 文本范围的索引 包含空隙部分
 };
 
 export type SplittedByLineTextRange = GapFilledTextRange & {
@@ -68,11 +67,14 @@ export type CursorPosition = {
   index: number; // 索引
 };
 
-export type ActivatedObject = {
-  status: "idle" | "activated";
-  activatedRangeIndex: number;
-  isGap: boolean;
-  overlapped: boolean;
+export type DraggingObjectType = {
+  hoverPosition: number;
+  draggingCursorPos: CursorPosition;
+  validDropRange: {
+    // 有效的放置范围
+    s: number;
+    e: number;
+  };
 };
 
 // constants
@@ -104,12 +106,20 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
   const [isDragging, _setIsDragging] = useState(false);
-  const [activatedObject, setActivatedObject] = useState<ActivatedObject>({
-    isGap: false,
-    activatedRangeIndex: -1,
-    overlapped: false,
-    status: "idle",
+  const [DraggingObject, setDraggingObject] = useState<DraggingObjectType>({
+    hoverPosition: -1,
+    draggingCursorPos: {
+      pos: -1,
+      type: "s",
+      index: -1,
+    },
+    validDropRange: {
+      s: -1,
+      e: -1,
+    },
   });
+  const [activatedObject, setActivatedObject] =
+    useState<SplittedByLineTextRange | null>(null);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -172,18 +182,13 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     _setIsDragging(false);
   };
 
-  const setActivatedRange = (
-    activatedRangeIndex: number,
-    isGap: boolean,
-    overlapped: boolean
-  ) => {
-    setActivatedObject({
-      ...activatedObject,
-      activatedRangeIndex,
-      isGap,
-      overlapped,
-      status: "activated",
-    });
+  const setActivatedRange = (active: SplittedByLineTextRange) => {
+    if (active)
+      setActivatedObject({
+        ...activatedObject,
+        ...active,
+      });
+    else setActivatedObject(null);
   };
 
   // 整个文本的切分计算
@@ -212,7 +217,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       Math.floor(lineRange.e)
     );
 
-    // console.log({ _byLine });
+    console.log({ _byLine });
 
     setByLine(_byLine);
   }, [gapFilled, lineRange]);
@@ -232,6 +237,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         setIsDropping, // 设置正在放置
         setActivatedRange, // 设置激活区间
         setVisibleRange, // 设置可视区间
+        setDraggingObject, // 设置拖动对象
       }}
     >
       <DndProvider debugMode={true} backend={HTML5Backend}>
@@ -257,6 +263,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
           <div>
             <h5>正在拖动:</h5>
             {isDragging ? "是" : "否"}
+          </div>
+          <div>
+            <h5>拖动对象:</h5>
+            <pre>{JSON.stringify(DraggingObject, null, 2)}</pre>
           </div>
           <div>
             <h5>可见行范围:</h5>

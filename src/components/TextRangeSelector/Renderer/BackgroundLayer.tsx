@@ -30,9 +30,10 @@ const Part = ({
   useEffect(() => {
     // 非空隙部分，且 hoverIndex 包含当前区域
     if (
+      activatedObject &&
       !activatedObject.isGap &&
       !isGap &&
-      part.hoverIndex.includes(activatedObject.activatedRangeIndex)
+      part.hoverIndex.includes(activatedObject.index)
     ) {
       setIsActivated(true);
       return;
@@ -40,9 +41,10 @@ const Part = ({
 
     // 空隙部分，且 hoverIndex 包含当前区域
     if (
+      activatedObject &&
       activatedObject.isGap &&
       isGap &&
-      part.hoverIndex.includes(activatedObject.activatedRangeIndex)
+      part.gapIndex === activatedObject.gapIndex
     ) {
       setIsActivated(true);
       return;
@@ -53,12 +55,13 @@ const Part = ({
   }, [activatedObject]);
 
   useEffect(() => {
-    if (isActivated) {
+    // 当前区域被激活
+    if (isActivated && activatedObject) {
       // 获取触发激活的区域， 如果是重叠 则有两种可能 头部是重叠部分 或者 尾部是重叠部分
-      const { activatedRangeIndex } = activatedObject;
+      const { index: activatedRangeIndex } = activatedObject;
 
       // part 是 重叠部分
-      if (part.index === -1) {
+      if (part.isOverlapped) {
         // activatedRangeIndex 比 part.hoverIndex 的最大值小 说明是头部
         // 重叠部分为头部 则 headCursor 为 s
         if (activatedRangeIndex < Math.max(...part.hoverIndex)) {
@@ -114,10 +117,17 @@ const Part = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActivated]);
 
-  const highlight = (index: number[], isGap: boolean, overlapped: boolean) => {
-    // TODO: 点击重叠的区域靠后的区域被激活
-    const maxIndex = Math.max(...index);
-    setActivatedRange(maxIndex, isGap, overlapped);
+  const highlight = (part: SplittedByLineTextRange) => {
+    if (part.isOverlapped) {
+      // do nothing
+      return;
+    }
+
+    if (activatedObject && part.overallIndex === activatedObject.overallIndex) {
+      setActivatedRange(null);
+    } else {
+      setActivatedRange(part);
+    }
   };
 
   return (
@@ -133,7 +143,7 @@ const Part = ({
           !isActivated && overlapped && "bg-gray-300", //  重叠部分
           !isActivated && isGap && "bg-transparent" //  空隙部分
         )}
-        onClick={() => highlight(part.hoverIndex, isGap, overlapped)}
+        onClick={() => highlight(part)}
       >
         {partText}
       </span>

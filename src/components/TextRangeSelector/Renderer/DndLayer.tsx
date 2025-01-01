@@ -14,10 +14,12 @@ function Char({
   children,
   index,
   onDrop,
+  onHover,
 }: {
   children: React.ReactNode;
   index: number;
   onDrop: (pos: CursorPosition, newPos: number) => void;
+  onHover: (pos: CursorPosition, newPos: number) => void;
 }) {
   const [{ isOver }, drop] = useDrop(
     () => ({
@@ -27,7 +29,11 @@ function Char({
       },
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
+        item: monitor.getItem(),
       }),
+      hover: (item) => {
+        onHover(item as CursorPosition, index);
+      },
     }),
     [index]
   );
@@ -44,7 +50,7 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text, startPos }: { text: string; startPos: number }) {
-  const { setTextRanges, setIsDropping, isDragging } =
+  const { setTextRanges, setIsDropping, isDragging, setDraggingObject } =
     useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
@@ -64,11 +70,24 @@ function DndLayer({ text, startPos }: { text: string; startPos: number }) {
     });
   };
 
+  const onHover = (pos: CursorPosition, newPos: number) => {
+    setDraggingObject({
+      hoverPosition: newPos,
+      draggingCursorPos: pos,
+    });
+  };
+
   return (
     <>
+      {/* 只有在拖拽的时候才渲染 */}
       {isDragging
         ? text.split(splitter).map((char, index) => (
-            <Char key={index} index={index + startPos} onDrop={onDrop}>
+            <Char
+              key={index}
+              index={index + startPos}
+              onDrop={onDrop}
+              onHover={onHover}
+            >
               {char}
             </Char>
           ))

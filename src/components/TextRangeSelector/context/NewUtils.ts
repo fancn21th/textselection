@@ -91,7 +91,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
         },
       ];
     }
-
+    // 当前区间只和后区间重叠
     if (current.tailOverlappedPos) {
       return [
         {
@@ -113,6 +113,7 @@ export const toOverLappedTextRanges = (ranges: IndexedOriginTextRange[]) => {
       ];
     }
 
+    // 当前区间不重叠
     return [
       {
         s: current.s,
@@ -151,7 +152,7 @@ export const fillGaps = (
   ranges: OverlappedTextRange[],
   length: number
 ): GapFilledTextRange[] => {
-  const gapFilled = [];
+  const gapFilled: GapFilledTextRange[] = [];
   let lastEnd = 0;
   let gapIndex = 0;
   for (const { s, e, index, overlapped, isOverlapped, hoverIndex } of ranges) {
@@ -160,20 +161,24 @@ export const fillGaps = (
         s: lastEnd,
         e: s,
         index: -1,
-        hoverIndex: [gapIndex++],
+        gapIndex: gapIndex++,
+        hoverIndex: [],
         overlapped: [],
         isOverlapped: false,
-        isGap: true,
+        isGap: true, // 空隙部分
+        overallIndex: -1,
       });
     }
     gapFilled.push({
       s,
       e,
       index,
+      gapIndex: -1,
       hoverIndex,
       overlapped,
       isGap: false,
       isOverlapped,
+      overallIndex: -1,
     });
     lastEnd = e;
   }
@@ -182,13 +187,24 @@ export const fillGaps = (
       s: lastEnd,
       e: length,
       index: -1,
-      hoverIndex: [gapIndex++],
+      gapIndex: gapIndex++,
+      hoverIndex: [],
       overlapped: [],
       isOverlapped: false,
-      isGap: true,
+      isGap: true, // 空隙部分
+      overallIndex: -1,
     });
   }
-  return gapFilled;
+
+  // 修正 overallIndex
+  const indexed = gapFilled.map((range, index) => {
+    return {
+      ...range,
+      overallIndex: index,
+    };
+  });
+
+  return indexed;
 };
 
 // split the ranges by line
@@ -251,6 +267,8 @@ export const splitRangesByLine = (
             segmentStart - chunk.start,
             segmentEnd - chunk.start
           ),
+          gapIndex: range.gapIndex,
+          overallIndex: range.overallIndex,
         };
       })
     )
