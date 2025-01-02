@@ -1,24 +1,24 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
-import { CursorPosition, NewTRSContext } from "../context/NewTRSContext";
+import { CursorPosition, NewTRSContext } from "../../context/NewTRSContext";
 
 export function CursorGhost({ pos }: { pos: CursorPosition }) {
-  const { setIsDragging } = useContext(NewTRSContext);
+  const { setIsDragging, setIsDropping } = useContext(NewTRSContext);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
     item: () => {
+      setIsDragging();
       return pos;
     },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
+    end: () => {
+      setIsDropping();
+    },
   }));
-
-  useEffect(() => {
-    if (isDragging) setIsDragging();
-  }, [isDragging, setIsDragging]);
 
   return (
     <span

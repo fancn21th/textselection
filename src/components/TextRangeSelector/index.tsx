@@ -8,7 +8,17 @@ function Render({ text }: { text: string }) {
 
   useEffect(() => {
     setFullText(text);
-    setTextRanges(generateRandomRangesWithPercentage(text.length));
+    // setTextRanges(generateRandomRangesWithPercentage(text.length));
+    setTextRanges([
+      {
+        s: 0,
+        e: 20,
+      },
+      {
+        s: 15,
+        e: 40,
+      },
+    ]);
   }, []);
 
   return (

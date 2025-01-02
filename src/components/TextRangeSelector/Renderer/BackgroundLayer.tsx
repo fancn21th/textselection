@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import {
-  CursorPosition,
   NewTRSContext,
   SplittedByLineTextRange,
 } from "../context/NewTRSContext";
-import { CursorGhost } from "./Cursor";
 
 // part 是 行内的一个区域 是背景渲染的最小单位
 // 一个 range 可能会被分割成多个 part
@@ -16,11 +14,9 @@ const Part = ({
   partText: string;
   part: SplittedByLineTextRange;
 }) => {
-  const { activatedObject, setActivatedRange, cursorPositions } =
+  const { activatedObject, setActivatedRange, isDragging } =
     useContext(NewTRSContext);
   const [isActivated, setIsActivated] = useState(false);
-  const [headCursor, setHeadCursor] = useState<CursorPosition | null>(null);
-  const [tailCursor, setTailCursor] = useState<CursorPosition | null>(null);
 
   const overlapped = part.isOverlapped; // 重叠部分
   const isOdd = part.index % 2 === 1; // 奇数区域
@@ -54,101 +50,37 @@ const Part = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activatedObject]);
 
-  useEffect(() => {
-    // 当前区域被激活
-    if (isActivated && activatedObject) {
-      // 获取触发激活的区域， 如果是重叠 则有两种可能 头部是重叠部分 或者 尾部是重叠部分
-      const { index: activatedRangeIndex } = activatedObject;
-
-      // part 是 重叠部分
-      if (part.isOverlapped) {
-        // activatedRangeIndex 比 part.hoverIndex 的最大值小 说明是头部
-        // 重叠部分为头部 则 headCursor 为 s
-        if (activatedRangeIndex < Math.max(...part.hoverIndex)) {
-          const tail = cursorPositions.find(
-            (cursor) => cursor.pos === part.e && cursor.type === "e"
-          );
-          if (tail) {
-            setTailCursor(tail);
-          }
-        } else {
-          const head = cursorPositions.find(
-            (cursor) => cursor.pos === part.s && cursor.type === "s"
-          );
-          if (head) {
-            setHeadCursor(head);
-          }
-        }
-      } else {
-        // part 是 非重叠部分
-        // part 和其他 part 有重叠
-        if (part.overlapped && part.overlapped.length > 0) {
-          const head = cursorPositions.find(
-            (cursor) => cursor.pos === part.s && cursor.type === "s"
-          );
-          if (head) {
-            setHeadCursor(head);
-          }
-
-          const tail = cursorPositions.find(
-            (cursor) => cursor.pos === part.e && cursor.type === "e"
-          );
-          if (tail) {
-            setTailCursor(tail);
-          }
-        } else {
-          // part 和其他 part 没有重叠
-          const head = cursorPositions.find(
-            (cursor) => cursor.pos === part.s && cursor.type === "s"
-          );
-          if (head) {
-            setHeadCursor(head);
-          }
-
-          const tail = cursorPositions.find(
-            (cursor) => cursor.pos === part.e && cursor.type === "e"
-          );
-          if (tail) {
-            setTailCursor(tail);
-          }
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActivated]);
-
+  // 激活当前区域
   const highlight = (part: SplittedByLineTextRange) => {
-    if (part.isOverlapped) {
+    if (isDragging || part.isOverlapped) {
       // do nothing
       return;
     }
 
     if (activatedObject && part.overallIndex === activatedObject.overallIndex) {
+      // 取消激活
       setActivatedRange(null);
     } else {
+      // 激活
       setActivatedRange(part);
     }
   };
 
   return (
-    <>
-      {headCursor && <CursorGhost pos={headCursor} />}
-      <span
-        className={clsx(
-          // "text-transparent",
-          "cursor-pointer",
-          isActivated && "bg-yellow-300", // 激活状态
-          !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
-          !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
-          !isActivated && overlapped && "bg-gray-300", //  重叠部分
-          !isActivated && isGap && "bg-transparent" //  空隙部分
-        )}
-        onClick={() => highlight(part)}
-      >
-        {partText}
-      </span>
-      {tailCursor && <CursorGhost pos={tailCursor} />}
-    </>
+    <span
+      className={clsx(
+        // "text-transparent",
+        "cursor-pointer",
+        isActivated && "bg-yellow-300", // 激活状态
+        !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
+        !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
+        !isActivated && overlapped && "bg-gray-300", //  重叠部分
+        !isActivated && isGap && "bg-transparent" //  空隙部分
+      )}
+      onClick={() => highlight(part)}
+    >
+      {partText}
+    </span>
   );
 };
 

@@ -16,7 +16,9 @@ export const LineCharCount = 50;
 // Types for context value
 export type NewTRSContextType = {
   byLine: SplittedByLineTextRange[];
+  gapFilledByIndex: GapFilledTextRangeByIndex;
   isDragging: boolean;
+  draggingObject: DraggingObjectType;
   cursorPositions: CursorPosition[];
   activatedObject: SplittedByLineTextRange | null;
   chunks: string[];
@@ -51,6 +53,10 @@ export type GapFilledTextRange = OverlappedTextRange & {
   overallIndex: number; // 文本范围的索引 包含空隙部分
 };
 
+export type GapFilledTextRangeByIndex = {
+  [index: number]: GapFilledTextRange;
+};
+
 export type SplittedByLineTextRange = GapFilledTextRange & {
   lineNumber: number;
   text: string;
@@ -69,7 +75,7 @@ export type CursorPosition = {
 
 export type DraggingObjectType = {
   hoverPosition: number;
-  draggingCursorPos: CursorPosition;
+  draggingCursorPos: CursorPosition | null;
   validDropRange: {
     // 有效的放置范围
     s: number;
@@ -103,16 +109,14 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   const [charCount, setCharCount] = useState(0);
   const [cursorPositions, setCursorPositions] = useState<CursorPosition[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
+  const [gapFilledByIndex, setGapFilledByIndex] =
+    useState<GapFilledTextRangeByIndex>({});
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
   const [isDragging, _setIsDragging] = useState(false);
-  const [DraggingObject, setDraggingObject] = useState<DraggingObjectType>({
+  const [draggingObject, setDraggingObject] = useState<DraggingObjectType>({
     hoverPosition: -1,
-    draggingCursorPos: {
-      pos: -1,
-      type: "s",
-      index: -1,
-    },
+    draggingCursorPos: null,
     validDropRange: {
       s: -1,
       e: -1,
@@ -175,6 +179,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const setIsDragging = () => {
+    // TODO: 重渲染导致无法正确设置
     _setIsDragging(true);
   };
 
@@ -182,7 +187,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     _setIsDragging(false);
   };
 
-  const setActivatedRange = (active: SplittedByLineTextRange) => {
+  const setActivatedRange = (active: SplittedByLineTextRange | null) => {
     if (active)
       setActivatedObject({
         ...activatedObject,
@@ -201,6 +206,14 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     const _gapFilled = fillGaps(overLapped, charCount);
     // console.log({ _gapFilled });
     setGapFilled(_gapFilled);
+
+    // 第三步：按索引创建对象
+    const _gapFilledByIndex = _gapFilled.reduce((acc, cur) => {
+      acc[cur.overallIndex] = cur;
+      return acc;
+    }, {} as GapFilledTextRangeByIndex);
+    console.log({ _gapFilledByIndex });
+    setGapFilledByIndex(_gapFilledByIndex);
   }, [internalTextRanges, charCount]);
 
   // 窗口的切分计算
@@ -227,8 +240,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       value={{
         chunks, // 换行符分块文本
         byLine, // 按行切分的文本
+        gapFilledByIndex, // 按总索引的文本范围
         cursorPositions, // 光标位置
         isDragging, // 是否正在拖动
+        draggingObject, // 拖动对象
         activatedObject, // 激活对象
         setFullText, // 设置全文文本
         setTextRanges, // 设置文本区间 SOT
@@ -266,7 +281,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
           </div>
           <div>
             <h5>拖动对象:</h5>
-            <pre>{JSON.stringify(DraggingObject, null, 2)}</pre>
+            <pre>{JSON.stringify(draggingObject, null, 2)}</pre>
           </div>
           <div>
             <h5>可见行范围:</h5>

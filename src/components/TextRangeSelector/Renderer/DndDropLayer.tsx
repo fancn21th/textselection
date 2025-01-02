@@ -50,11 +50,10 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text, startPos }: { text: string; startPos: number }) {
-  const { setTextRanges, setIsDropping, isDragging, setDraggingObject } =
+  const { setTextRanges, setDraggingObject, isDragging, draggingObject } =
     useContext(NewTRSContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
-    setIsDropping();
     setTextRanges((pre: OriginTextRange[]) => {
       return pre.map((range: OriginTextRange, index: number) => {
         if (pos.index === index) {
@@ -71,10 +70,11 @@ function DndLayer({ text, startPos }: { text: string; startPos: number }) {
   };
 
   const onHover = (pos: CursorPosition, newPos: number) => {
-    setDraggingObject({
-      hoverPosition: newPos,
-      draggingCursorPos: pos,
-    });
+    if (isDragging)
+      setDraggingObject({
+        ...draggingObject,
+        hoverPosition: newPos,
+      });
   };
 
   return (

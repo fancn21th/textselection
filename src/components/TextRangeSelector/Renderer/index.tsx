@@ -5,7 +5,8 @@ import {
 } from "../context/NewTRSContext";
 import { FixedSizeList as List } from "react-window";
 import clsx from "clsx";
-import DndLayer from "./DndLayer";
+import DndDragLayer from "./DndDragLayer";
+import DndDropLayer from "./DndDropLayer";
 import BackgroundLayer from "./BackgroundLayer";
 
 type ByKey = {
@@ -13,8 +14,15 @@ type ByKey = {
 };
 
 function Text() {
-  const { setNewLineRange, chunks, byLine, isDragging, setVisibleRange } =
-    useContext(NewTRSContext);
+  const {
+    setNewLineRange,
+    chunks,
+    byLine,
+    isDragging,
+    setVisibleRange,
+    setIsDropping,
+    activatedObject,
+  } = useContext(NewTRSContext);
 
   // byLine 转换
   const byLineGroupedByKey = useMemo(() => {
@@ -28,14 +36,6 @@ function Text() {
   }, [byLine]);
 
   console.log({ byLineGroupedByKey });
-
-  // const onMouseEnter = (lineIndex: number) => {
-  //   console.log("lineIndex onMouseEnter", lineIndex);
-  // };
-
-  // const onMouseLeave = (lineIndex: number) => {
-  //   console.log("lineIndex onMouseLeave", lineIndex);
-  // };
 
   return (
     <List
@@ -57,18 +57,24 @@ function Text() {
           endIndex: visibleStopIndex,
         });
       }}
+      onScroll={() => {
+        // TODO: 解决 dragging 状态无法正确取消的问题
+        if (isDragging) setIsDropping();
+      }}
     >
       {({ index, style }: { index: number; style: React.CSSProperties }) => {
         const text = chunks[index];
         const parts = byLineGroupedByKey[index];
         const startPos = parts && parts[0].s;
+        // gap 区域没有 拖动功能
+        const showDragLayer =
+          activatedObject !== null &&
+          parts &&
+          parts.length > 0 &&
+          parts.some((part) => part.index === activatedObject.index);
 
         return (
-          <div
-            style={style}
-            // onMouseEnter={() => onMouseEnter(index)}
-            // onMouseLeave={() => onMouseLeave(index)}
-          >
+          <div style={style}>
             {/* text layer */}
             <div className="">
               <span className={clsx()}>{text}</span>
@@ -77,14 +83,23 @@ function Text() {
             <div className={clsx("absolute left-0 top-0")}>
               {parts && <BackgroundLayer parts={parts} />}
             </div>
-            {/* dnd layer */}
+            {/* dnd drag layer */}
             <div
               className={clsx(
-                "absolute left-0 top-0 ",
+                "absolute left-0 top-0",
+                !showDragLayer && "pointer-events-none"
+              )}
+            >
+              {showDragLayer && <DndDragLayer text={text} />}
+            </div>
+            {/* dnd drop layer */}
+            <div
+              className={clsx(
+                "absolute left-0 top-0",
                 !isDragging && "pointer-events-none"
               )}
             >
-              <DndLayer text={text} startPos={startPos} />
+              <DndDropLayer text={text} startPos={startPos} />
             </div>
           </div>
         );
