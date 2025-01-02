@@ -159,6 +159,9 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
 
     // console.log({ sorted });
 
+    // 重置
+    setActivatedObject(null);
+
     setInternalTextRanges(sorted);
   }, [textRanges]);
 
@@ -256,7 +259,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       </DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[500px] overflow-y-scroll">
+        <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[200px] overflow-y-scroll">
           <div>
             <h5>字符长度:</h5>
             {charCount}
