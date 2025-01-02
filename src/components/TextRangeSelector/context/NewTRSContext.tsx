@@ -65,7 +65,7 @@ export type ActivatedTextRange = SplittedByLineTextRange & {
   activatedRange: {
     s: number;
     e: number;
-  };
+  } | null;
 };
 
 export type LineRange = {
@@ -184,8 +184,8 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         ...activatedObject,
         ...active,
         activatedRange: {
-          s: internalTextRanges[active.index].s,
-          e: internalTextRanges[active.index].e,
+          s: active.index !== -1 ? internalTextRanges[active.index].s : -1,
+          e: active.index !== -1 ? internalTextRanges[active.index].e : -1,
         },
       });
     else setActivatedObject(null);
@@ -256,7 +256,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       </DndProvider>
       {/* debugger */}
       {createPortal(
-        <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[200px] overflow-y-scroll">
+        <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[500px] overflow-y-scroll">
           <div>
             <h5>字符长度:</h5>
             {charCount}
