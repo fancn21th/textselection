@@ -6,6 +6,8 @@ import { CursorPosition, NewTRSContext } from "../../context/NewTRSContext";
 export function CursorGhost({ pos }: { pos: CursorPosition }) {
   const { setIsDragging, setIsDropping } = useContext(NewTRSContext);
 
+  console.log("CursorGhost");
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
     item: () => {
@@ -26,6 +28,7 @@ export function CursorGhost({ pos }: { pos: CursorPosition }) {
         // "text-transparent",
         "font-extrabold text-pink-500",
         "absolute z-50 cursor-move",
+        "pointer-events-auto",
         isDragging && "opacity-50"
       )}
       ref={drag}

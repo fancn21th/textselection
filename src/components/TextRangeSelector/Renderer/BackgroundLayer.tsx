@@ -74,7 +74,7 @@ const Part = ({
         isActivated && "bg-yellow-300", // 激活状态
         !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
         !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
-        !isActivated && overlapped && "bg-gray-300", //  重叠部分
+        !isActivated && overlapped && "bg-gray-300 cursor-default", //  重叠部分
         !isActivated && isGap && "bg-transparent" //  空隙部分
       )}
       onClick={() => highlight(part)}

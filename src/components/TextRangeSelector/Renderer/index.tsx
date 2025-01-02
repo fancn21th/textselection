@@ -35,7 +35,7 @@ function Text() {
     }, {});
   }, [byLine]);
 
-  console.log({ byLineGroupedByKey });
+  // console.log({ byLineGroupedByKey });
 
   return (
     <List
@@ -85,12 +85,9 @@ function Text() {
             </div>
             {/* dnd drag layer */}
             <div
-              className={clsx(
-                "absolute left-0 top-0",
-                !showDragLayer && "pointer-events-none"
-              )}
+              className={clsx("absolute left-0 top-0", "pointer-events-none")}
             >
-              {showDragLayer && <DndDragLayer text={text} />}
+              {showDragLayer && <DndDragLayer parts={parts} />}
             </div>
             {/* dnd drop layer */}
             <div

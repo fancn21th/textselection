@@ -19,8 +19,7 @@ export type NewTRSContextType = {
   gapFilledByIndex: GapFilledTextRangeByIndex;
   isDragging: boolean;
   draggingObject: DraggingObjectType;
-  cursorPositions: CursorPosition[];
-  activatedObject: SplittedByLineTextRange | null;
+  activatedObject: ActivatedTextRange | null;
   chunks: string[];
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
@@ -60,6 +59,13 @@ export type GapFilledTextRangeByIndex = {
 export type SplittedByLineTextRange = GapFilledTextRange & {
   lineNumber: number;
   text: string;
+};
+
+export type ActivatedTextRange = SplittedByLineTextRange & {
+  activatedRange: {
+    s: number;
+    e: number;
+  };
 };
 
 export type LineRange = {
@@ -107,7 +113,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     IndexedOriginTextRange[]
   >([]);
   const [charCount, setCharCount] = useState(0);
-  const [cursorPositions, setCursorPositions] = useState<CursorPosition[]>([]);
   const [gapFilled, setGapFilled] = useState<GapFilledTextRange[]>([]);
   const [gapFilledByIndex, setGapFilledByIndex] =
     useState<GapFilledTextRangeByIndex>({});
@@ -123,7 +128,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     },
   });
   const [activatedObject, setActivatedObject] =
-    useState<SplittedByLineTextRange | null>(null);
+    useState<ActivatedTextRange | null>(null);
 
   // wrapper for setFullText
   const setFullText = (text: string) => {
@@ -142,33 +147,19 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   // 计算派生状态
   useEffect(() => {
     // sorted by start position
-    const sorted = textRanges.slice().sort((a, b) => a.s - b.s);
-
-    setCursorPositions(
-      sorted.slice().flatMap<CursorPosition>((range, index) => {
-        return [
-          {
-            pos: range.s,
-            type: "s",
-            index,
-          },
-          {
-            pos: range.e,
-            type: "e",
-            index,
-          },
-        ];
-      })
-    );
-
-    setInternalTextRanges(
-      sorted.map((range, index) => {
+    const sorted = textRanges
+      .slice()
+      .sort((a, b) => a.s - b.s)
+      .map((range, index) => {
         return {
           ...range,
           index,
         };
-      })
-    );
+      });
+
+    // console.log({ sorted });
+
+    setInternalTextRanges(sorted);
   }, [textRanges]);
 
   const setNewLineRange = (s: number, e: number) => {
@@ -192,6 +183,10 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       setActivatedObject({
         ...activatedObject,
         ...active,
+        activatedRange: {
+          s: internalTextRanges[active.index].s,
+          e: internalTextRanges[active.index].e,
+        },
       });
     else setActivatedObject(null);
   };
@@ -202,6 +197,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     // 第一步：将区间按重叠切割
     const overLapped = toOverLappedTextRanges(Array.from(internalTextRanges));
     // console.log({ overLapped });
+
     // 第二步：填充
     const _gapFilled = fillGaps(overLapped, charCount);
     // console.log({ _gapFilled });
@@ -212,7 +208,8 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       acc[cur.overallIndex] = cur;
       return acc;
     }, {} as GapFilledTextRangeByIndex);
-    console.log({ _gapFilledByIndex });
+    // console.log({ _gapFilledByIndex });
+
     setGapFilledByIndex(_gapFilledByIndex);
   }, [internalTextRanges, charCount]);
 
@@ -230,7 +227,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       Math.floor(lineRange.e)
     );
 
-    console.log({ _byLine });
+    // console.log({ _byLine });
 
     setByLine(_byLine);
   }, [gapFilled, lineRange]);
@@ -241,7 +238,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         chunks, // 换行符分块文本
         byLine, // 按行切分的文本
         gapFilledByIndex, // 按总索引的文本范围
-        cursorPositions, // 光标位置
         isDragging, // 是否正在拖动
         draggingObject, // 拖动对象
         activatedObject, // 激活对象
@@ -273,8 +269,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
             <h5>Range分段:</h5>
             <pre>{JSON.stringify(textRanges, null, 2)}</pre>
           </div>
-
-          {/* Cursors: <pre>{JSON.stringify(cursorPositions, null, 2)}</pre> */}
           <div>
             <h5>正在拖动:</h5>
             {isDragging ? "是" : "否"}
