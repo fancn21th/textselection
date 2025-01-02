@@ -35,7 +35,7 @@ function Text() {
     }, {});
   }, [byLine]);
 
-  // console.log({ byLineGroupedByKey });
+  console.log({ byLineGroupedByKey });
 
   return (
     <List
@@ -71,7 +71,12 @@ function Text() {
           activatedObject !== null &&
           parts &&
           parts.length > 0 &&
-          parts.some((part) => part.index === activatedObject.index);
+          parts.some((part) => {
+            return (
+              part.index === activatedObject.index ||
+              part.hoverIndex.includes(activatedObject.index)
+            );
+          });
 
         return (
           <div style={style}>
