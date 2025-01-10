@@ -1,13 +1,10 @@
 import { Fragment, useContext } from "react";
-import {
-  NewTRSContext,
-  SplittedByLineTextRange,
-} from "../context/NewTRSContext";
+import { RangeContext, SplittedByLineTextRange } from "../context/RangeContext";
 import { CursorGhost } from "./components/Cursor";
 
 const DndDragLayer = ({ parts }: { parts: SplittedByLineTextRange[] }) => {
   // TODO: 注意这一层只负责 Cursor 的拖动， 因此 所有文字是透明的并且不响应事件
-  const { activatedObject } = useContext(NewTRSContext);
+  const { activatedObject } = useContext(RangeContext);
 
   return (
     <>

@@ -1,8 +1,5 @@
 import { useContext, useMemo } from "react";
-import {
-  NewTRSContext,
-  SplittedByLineTextRange,
-} from "../context/NewTRSContext";
+import { RangeContext, SplittedByLineTextRange } from "../context/RangeContext";
 import { FixedSizeList as List } from "react-window";
 import clsx from "clsx";
 import DndDragLayer from "./DndDragLayer";
@@ -14,15 +11,8 @@ type ByKey = {
 };
 
 function Text() {
-  const {
-    setNewLineRange,
-    chunks,
-    byLine,
-    isDragging,
-    setVisibleRange,
-    setIsDropping,
-    activatedObject,
-  } = useContext(NewTRSContext);
+  const { setNewLineRange, chunks, byLine, setVisibleRange, activatedObject } =
+    useContext(RangeContext);
 
   // byLine 转换
   const byLineGroupedByKey = useMemo(() => {
@@ -57,10 +47,7 @@ function Text() {
           endIndex: visibleStopIndex,
         });
       }}
-      onScroll={() => {
-        // TODO: 解决 dragging 状态无法正确取消的问题
-        if (isDragging) setIsDropping();
-      }}
+      onScroll={() => {}}
     >
       {({ index, style }: { index: number; style: React.CSSProperties }) => {
         const text = chunks[index];
@@ -95,12 +82,7 @@ function Text() {
               {showDragLayer && <DndDragLayer parts={parts} />}
             </div>
             {/* dnd drop layer */}
-            <div
-              className={clsx(
-                "absolute left-0 top-0",
-                !isDragging && "pointer-events-none"
-              )}
-            >
+            <div className={clsx("absolute left-0 top-0")}>
               <DndDropLayer text={text} startPos={startPos} />
             </div>
           </div>

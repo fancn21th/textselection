@@ -1,4 +1,4 @@
-import { OriginTextRange } from "../context/NewTRSContext";
+import { OriginTextRange } from "../context/RangeContext";
 
 /**
  * 随机生成连续的文本范围，覆盖整个文本，每个范围的步长为文本长度的 1% 到 10%。

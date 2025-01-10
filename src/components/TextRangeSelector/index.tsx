@@ -1,24 +1,24 @@
 import { useContext, useEffect } from "react";
 import Renderer from "./Renderer";
-import { NewTRSContext, NewTRSProvider } from "./context/NewTRSContext";
-import { generateRandomRangesWithPercentage } from "./helper";
+import { RangeContext, NewTRSProvider } from "./context/RangeContext";
+// import { generateRandomRangesWithPercentage } from "./helper";
 
 function Render({ text }: { text: string }) {
-  const { setFullText, setTextRanges } = useContext(NewTRSContext);
+  const { setFullText, setTextRanges } = useContext(RangeContext);
 
   useEffect(() => {
     setFullText(text);
-    setTextRanges(generateRandomRangesWithPercentage(text.length));
-    // setTextRanges([
-    //   {
-    //     s: 0,
-    //     e: 20,
-    //   },
-    //   {
-    //     s: 15,
-    //     e: 100,
-    //   },
-    // ]);
+    // setTextRanges(generateRandomRangesWithPercentage(text.length));
+    setTextRanges([
+      {
+        s: 0,
+        e: 20,
+      },
+      {
+        s: 15,
+        e: 100,
+      },
+    ]);
   }, []);
 
   return (

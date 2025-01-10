@@ -3,7 +3,7 @@ import {
   IndexedOriginTextRange,
   OverlappedTextRange,
   SplittedByLineTextRange,
-} from "./NewTRSContext";
+} from "./RangeContext";
 
 type Marked = IndexedOriginTextRange & {
   tailOverlappedIndex: number | null;

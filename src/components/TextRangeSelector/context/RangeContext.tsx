@@ -14,7 +14,7 @@ import { createPortal } from "react-dom";
 export const LineCharCount = 50;
 
 // Types for context value
-export type NewTRSContextType = {
+export type RangeContextType = {
   byLine: SplittedByLineTextRange[];
   gapFilledByIndex: GapFilledTextRangeByIndex;
   isDragging: boolean;
@@ -94,8 +94,8 @@ const BreakRegex = /(\r\n|\r|\n)/g;
 
 // 创建 Context
 // TODO: context warning
-export const NewTRSContext = createContext<NewTRSContextType>(
-  {} as NewTRSContextType
+export const RangeContext = createContext<RangeContextType>(
+  {} as RangeContextType
 );
 
 // 提供 Context 的 Provider
@@ -236,7 +236,7 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
   }, [gapFilled, lineRange]);
 
   return (
-    <NewTRSContext.Provider
+    <RangeContext.Provider
       value={{
         chunks, // 换行符分块文本
         byLine, // 按行切分的文本
@@ -287,6 +287,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         </div>,
         document.body
       )}
-    </NewTRSContext.Provider>
+    </RangeContext.Provider>
   );
 };
