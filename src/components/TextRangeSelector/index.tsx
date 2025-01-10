@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import Renderer from "./Renderer";
-import { RangeContext, NewTRSProvider } from "./context/RangeContext";
+import { RangeContext, RangeProvider } from "./context/RangeContext";
+import { DndProvider } from "./context/DndContext";
 // import { generateRandomRangesWithPercentage } from "./helper";
 
 function Render({ text }: { text: string }) {
@@ -35,9 +36,11 @@ function Render({ text }: { text: string }) {
 
 function TextRangeSelector({ text }: { text: string }) {
   return (
-    <NewTRSProvider>
-      <Render text={text}></Render>
-    </NewTRSProvider>
+    <RangeProvider>
+      <DndProvider>
+        <Render text={text}></Render>
+      </DndProvider>
+    </RangeProvider>
   );
 }
 

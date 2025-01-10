@@ -17,15 +17,12 @@ export const LineCharCount = 50;
 export type RangeContextType = {
   byLine: SplittedByLineTextRange[];
   gapFilledByIndex: GapFilledTextRangeByIndex;
-  isDragging: boolean;
   draggingObject: DraggingObjectType;
   activatedObject: ActivatedTextRange | null;
   chunks: string[];
   setFullText: (text: string) => void;
   setTextRanges: (ranges: OriginTextRange[]) => void;
   setNewLineRange: (s: number, e: number) => void;
-  setIsDragging: () => void;
-  setIsDropping: () => void;
   setActivatedRange: (active: SplittedByLineTextRange | null) => void;
   setVisibleRange: (range: { startIndex: number; endIndex: number }) => void;
   setDraggingObject: (obj: DraggingObjectType) => void;
@@ -99,7 +96,7 @@ export const RangeContext = createContext<RangeContextType>(
 );
 
 // 提供 Context 的 Provider
-export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
+export const RangeProvider = ({ children }: { children: ReactNode }) => {
   const [textRanges, setTextRanges] = useState<OriginTextRange[]>([]); // SOT
   const [chunks, setChunks] = useState<string[]>([]); // SOT
 
@@ -118,7 +115,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
     useState<GapFilledTextRangeByIndex>({});
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
-  const [isDragging, _setIsDragging] = useState(false);
   const [draggingObject, setDraggingObject] = useState<DraggingObjectType>({
     hoverPosition: -1,
     draggingCursorPos: null,
@@ -170,15 +166,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
       s,
       e,
     });
-  };
-
-  const setIsDragging = () => {
-    // TODO: 重渲染导致无法正确设置
-    _setIsDragging(true);
-  };
-
-  const setIsDropping = () => {
-    _setIsDragging(false);
   };
 
   const setActivatedRange = (active: SplittedByLineTextRange | null) => {
@@ -241,14 +228,11 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
         chunks, // 换行符分块文本
         byLine, // 按行切分的文本
         gapFilledByIndex, // 按总索引的文本范围
-        isDragging, // 是否正在拖动
         draggingObject, // 拖动对象
         activatedObject, // 激活对象
         setFullText, // 设置全文文本
         setTextRanges, // 设置文本区间 SOT
         setNewLineRange, // 设置新的行区间
-        setIsDragging, // 设置正在拖动
-        setIsDropping, // 设置正在放置
         setActivatedRange, // 设置激活区间
         setVisibleRange, // 设置可视区间
         setDraggingObject, // 设置拖动对象
@@ -271,10 +255,6 @@ export const NewTRSProvider = ({ children }: { children: ReactNode }) => {
           <div>
             <h5>Range分段:</h5>
             <pre>{JSON.stringify(textRanges, null, 2)}</pre>
-          </div>
-          <div>
-            <h5>正在拖动:</h5>
-            {isDragging ? "是" : "否"}
           </div>
           <div>
             <h5>拖动对象:</h5>

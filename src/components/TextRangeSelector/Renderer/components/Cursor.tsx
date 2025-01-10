@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
-import { CursorPosition, RangeContext } from "../../context/RangeContext";
+import { CursorPosition } from "../../context/RangeContext";
+import { DndContext } from "../../context/DndContext";
 
 export function CursorGhost({ pos }: { pos: CursorPosition }) {
-  const { setIsDragging, setIsDropping } = useContext(RangeContext);
+  const { setIsDragging, setIsDropping } = useContext(DndContext);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",

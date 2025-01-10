@@ -11,8 +11,7 @@ const Part = ({
   partText: string;
   part: SplittedByLineTextRange;
 }) => {
-  const { activatedObject, setActivatedRange, isDragging } =
-    useContext(RangeContext);
+  const { activatedObject, setActivatedRange } = useContext(RangeContext);
   const [isActivated, setIsActivated] = useState(false);
 
   const overlapped = part.isOverlapped; // 重叠部分
@@ -49,7 +48,7 @@ const Part = ({
 
   // 激活当前区域
   const highlight = (part: SplittedByLineTextRange) => {
-    if (isDragging || part.isOverlapped) {
+    if (part.isOverlapped) {
       // do nothing
       return;
     }

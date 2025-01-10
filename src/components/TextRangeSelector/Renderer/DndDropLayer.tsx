@@ -7,6 +7,7 @@ import {
   RangeContext,
   OriginTextRange,
 } from "../context/RangeContext";
+import { DndContext } from "../context/DndContext";
 
 const splitter = "";
 
@@ -45,7 +46,8 @@ function Char({
 
 // TODO: 性能优化
 function DndLayer({ text, startPos }: { text: string; startPos: number }) {
-  const { setTextRanges, isDragging } = useContext(RangeContext);
+  const { setTextRanges } = useContext(RangeContext);
+  const { isDragging } = useContext(DndContext);
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setTextRanges((pre: OriginTextRange[]) => {
