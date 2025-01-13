@@ -8,6 +8,8 @@ export type Coords = {
 
 export type DndContextType = {
   isDragging: boolean;
+  startCoords: Coords;
+  endCoords: Coords;
   setIsDragging: () => void;
   setIsDropping: () => void;
   setStartCoords: (coords: Coords) => void;
@@ -41,6 +43,8 @@ export const DndProvider = ({ children }: { children: React.ReactNode }) => {
     <DndContext.Provider
       value={{
         isDragging,
+        startCoords,
+        endCoords,
         setIsDragging,
         setIsDropping,
         setStartCoords,

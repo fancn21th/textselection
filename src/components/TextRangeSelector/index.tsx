@@ -24,7 +24,7 @@ function Render({ text }: { text: string }) {
 
   return (
     <div className="flex gap-1">
-      <div className="w-[900px] h-[550px] border border-red-500 overflow-y-scroll">
+      <div className="w-[900px] h-[550px] border border-red-500 overflow-y-scroll relative">
         <Renderer></Renderer>
       </div>
       <div className="flex-1 h-[550px] border border-blue-500 overflow-y-scroll">
