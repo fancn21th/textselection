@@ -14,6 +14,7 @@ export type DndContextType = {
   setIsDropping: () => void;
   setStartCoords: (coords: Coords) => void;
   setEndCoords: (coords: Coords) => void;
+  setContainerCoords: (coords: Coords) => void;
 };
 
 export const DndContext = createContext<DndContextType>({} as DndContextType);
@@ -22,6 +23,10 @@ export const DndProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDragging, _setIsDragging] = useState(false);
   const [startCoords, _setStartCoords] = useState<Coords>({ top: 0, left: 0 });
   const [endCoords, _setEndCoords] = useState<Coords>({ top: 0, left: 0 });
+  const [containerCoords, _setContainerCoords] = useState<Coords>({
+    top: 0,
+    left: 0,
+  });
 
   const setIsDragging = () => {
     _setIsDragging(true);
@@ -32,11 +37,21 @@ export const DndProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setStartCoords = (coords: Coords) => {
-    _setStartCoords(coords);
+    _setStartCoords({
+      top: coords.top - containerCoords.top,
+      left: coords.left - containerCoords.left,
+    });
   };
 
   const setEndCoords = (coords: Coords) => {
-    _setEndCoords(coords);
+    _setEndCoords({
+      top: coords.top - containerCoords.top,
+      left: coords.left - containerCoords.left,
+    });
+  };
+
+  const setContainerCoords = (coords: Coords) => {
+    _setContainerCoords(coords);
   };
 
   return (
@@ -49,6 +64,7 @@ export const DndProvider = ({ children }: { children: React.ReactNode }) => {
         setIsDropping,
         setStartCoords,
         setEndCoords,
+        setContainerCoords,
       }}
     >
       <>{children}</>
