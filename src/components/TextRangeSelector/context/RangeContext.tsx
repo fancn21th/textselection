@@ -244,26 +244,26 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
       {/* debugger */}
       {createPortal(
         <div className="flex absolute bottom-0 right-0 bg-gray-100 p-2 text-sm gap-1 h-[200px] overflow-y-scroll">
-          <div>
+          {/* <div>
             <h5>字符长度:</h5>
             {charCount}
-          </div>
+          </div> */}
           <div>
             <h5>激活范围:</h5>
             <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
           </div>
-          <div>
+          {/* <div>
             <h5>Range分段:</h5>
             <pre>{JSON.stringify(textRanges, null, 2)}</pre>
-          </div>
+          </div> */}
           <div>
             <h5>拖动对象:</h5>
             <pre>{JSON.stringify(draggingObject, null, 2)}</pre>
           </div>
-          <div>
+          {/* <div>
             <h5>可见行范围:</h5>
             Start: {visibleRange.startIndex} / End: {visibleRange.endIndex}
-          </div>
+          </div> */}
         </div>,
         document.body
       )}
