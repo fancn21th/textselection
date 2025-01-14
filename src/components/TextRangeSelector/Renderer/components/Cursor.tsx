@@ -32,7 +32,7 @@ export function Cursor({ pos }: { pos: CursorPosition }) {
       )}
       ref={drag}
     >
-      |
+      X
     </span>
   );
 }

@@ -252,18 +252,18 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
             <h5>激活范围:</h5>
             <pre>{JSON.stringify(activatedObject, null, 2)}</pre>
           </div>
-          {/* <div>
+          <div>
             <h5>Range分段:</h5>
             <pre>{JSON.stringify(textRanges, null, 2)}</pre>
-          </div> */}
+          </div>
           <div>
             <h5>拖动对象:</h5>
             <pre>{JSON.stringify(draggingObject, null, 2)}</pre>
           </div>
-          {/* <div>
+          <div>
             <h5>可见行范围:</h5>
             Start: {visibleRange.startIndex} / End: {visibleRange.endIndex}
-          </div> */}
+          </div>
         </div>,
         document.body
       )}

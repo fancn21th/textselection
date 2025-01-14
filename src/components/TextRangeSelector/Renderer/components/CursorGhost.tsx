@@ -15,12 +15,14 @@ export function CursorGhost({ pos }: { pos: CursorPosition }) {
         setStartCoords({
           top: rect.top,
           left: rect.left,
+          pos: pos,
         });
       }
       if (pos.type === "e") {
         setEndCoords({
           top: rect.top,
           left: rect.left,
+          pos: pos,
         });
       }
     }
