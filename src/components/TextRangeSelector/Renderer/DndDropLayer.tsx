@@ -44,7 +44,6 @@ function Char({
   );
 }
 
-// TODO: 性能优化
 function DndLayer({ text, startPos }: { text: string; startPos: number }) {
   const { setTextRanges } = useContext(RangeContext);
   const { isDragging } = useContext(DndContext);

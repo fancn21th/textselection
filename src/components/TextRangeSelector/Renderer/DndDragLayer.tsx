@@ -1,6 +1,6 @@
 import { Fragment, useContext } from "react";
 import { RangeContext, SplittedByLineTextRange } from "../context/RangeContext";
-import { CursorGhost } from "./components/Cursor";
+import { CursorGhost } from "./components/CursorGhost";
 
 const DndDragLayer = ({ parts }: { parts: SplittedByLineTextRange[] }) => {
   // TODO: 注意这一层只负责 Cursor 的拖动， 因此 所有文字是透明的并且不响应事件
