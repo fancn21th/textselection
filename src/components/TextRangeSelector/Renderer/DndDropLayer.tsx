@@ -17,13 +17,15 @@ const Char = React.memo(function ({
   index,
   onDrop,
   onHover,
-  inActivatedRange,
+  isActivated,
+  isDeactivated,
 }: {
   children: React.ReactNode;
   index: number;
   onDrop: (pos: CursorPosition, newPos: number) => void;
   onHover: (index: number) => void;
-  inActivatedRange: boolean;
+  isActivated: boolean;
+  isDeactivated: boolean;
 }) {
   const [{ isOver }, drop] = useDrop(
     () => ({
@@ -47,8 +49,9 @@ const Char = React.memo(function ({
       ref={drop}
       className={clsx(
         "text-transparent",
-        isOver && "border-2 border-l-red-700", //
-        inActivatedRange && "bg-yellow-300 opacity-50" //
+        isOver && "border-l-2 border-l-red-700", // 拖拽悬停
+        isActivated && !isDeactivated && "bg-yellow-300 opacity-50", // 扩展激活区域
+        isDeactivated && "bg-transparent" // 缩小激活区域
       )}
     >
       {children}
@@ -65,6 +68,7 @@ function DndDropLayer({ text, startPos }: { text: string; startPos: number }) {
   const end = activatedObject?.activatedRange?.e || -1;
   const atLeft = hoverIndex < start;
   const atRight = hoverIndex > end;
+  const atMiddle = start <= hoverIndex && hoverIndex < end;
 
   const onDrop = (pos: CursorPosition, newPos: number) => {
     setTextRanges((pre: OriginTextRange[]) => {
@@ -93,18 +97,31 @@ function DndDropLayer({ text, startPos }: { text: string; startPos: number }) {
         ? text.split(splitter).map((char, index) => {
             const pos = index + startPos;
             // 是否在激活的范围内
-            const inActivatedRange = start <= pos && pos < end;
+            const isInActivatedRange = start <= pos && pos < end;
+            // 左侧增加
             const isLeft =
               draggingObj?.type === "s" &&
               atLeft &&
               hoverIndex <= pos &&
               pos < start;
-
+            // 右侧增加
             const isRight =
               draggingObj?.type === "e" &&
               atRight &&
               end <= pos &&
               pos < hoverIndex;
+            // 左侧减少
+            const isLeftReduce =
+              draggingObj?.type === "s" &&
+              atMiddle &&
+              start < pos &&
+              pos < hoverIndex;
+            // 右侧减少
+            const isRightReduce =
+              draggingObj?.type === "e" &&
+              atMiddle &&
+              hoverIndex <= pos &&
+              pos < end;
 
             return (
               <Char
@@ -112,7 +129,8 @@ function DndDropLayer({ text, startPos }: { text: string; startPos: number }) {
                 index={pos}
                 onDrop={onDrop}
                 onHover={onHover}
-                inActivatedRange={inActivatedRange || isLeft || isRight}
+                isActivated={isInActivatedRange || isLeft || isRight}
+                isDeactivated={isLeftReduce || isRightReduce}
               >
                 {char}
               </Char>
