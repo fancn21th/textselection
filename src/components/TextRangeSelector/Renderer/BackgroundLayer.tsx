@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import { RangeContext, SplittedByLineTextRange } from "../context/RangeContext";
+import { DndContext } from "../context/DndContext";
 
 // part 是 行内的一个区域 是背景渲染的最小单位
 // 一个 range 可能会被分割成多个 part
@@ -12,6 +13,7 @@ const Part = ({
   part: SplittedByLineTextRange;
 }) => {
   const { activatedObject, setActivatedRange } = useContext(RangeContext);
+  const { isDragging } = useContext(DndContext);
   const [isActivated, setIsActivated] = useState(false);
 
   const overlapped = part.isOverlapped; // 重叠部分
@@ -67,7 +69,8 @@ const Part = ({
       className={clsx(
         // "text-transparent",
         "cursor-pointer",
-        isActivated && "bg-yellow-300", // 激活状态
+        isDragging && isActivated && "bg-transparent", // 拖拽状态
+        !isDragging && isActivated && "bg-yellow-300", // 激活状态
         !isActivated && !overlapped && isEven && "bg-red-300", //  偶数区域
         !isActivated && !overlapped && isOdd && "bg-green-300", //  奇数区域
         !isActivated && overlapped && "bg-gray-300 cursor-default", //  重叠部分

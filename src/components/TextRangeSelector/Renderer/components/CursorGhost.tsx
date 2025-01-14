@@ -32,7 +32,7 @@ export function CursorGhost({ pos }: { pos: CursorPosition }) {
     <span
       className={clsx(
         "font-extrabold text-pink-500",
-        "absolute z-50 cursor-move",
+        "absolute z-50",
         !isDragging && "invisible"
       )}
       ref={elementRef}

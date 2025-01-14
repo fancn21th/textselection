@@ -17,7 +17,6 @@ export const LineCharCount = 50;
 export type RangeContextType = {
   byLine: SplittedByLineTextRange[];
   gapFilledByIndex: GapFilledTextRangeByIndex;
-  draggingObject: DraggingObjectType;
   activatedObject: ActivatedTextRange | null;
   chunks: string[];
   setFullText: (text: string) => void;
@@ -25,7 +24,6 @@ export type RangeContextType = {
   setNewLineRange: (s: number, e: number) => void;
   setActivatedRange: (active: SplittedByLineTextRange | null) => void;
   setVisibleRange: (range: { startIndex: number; endIndex: number }) => void;
-  setDraggingObject: (obj: DraggingObjectType) => void;
 };
 
 export type OriginTextRange = {
@@ -76,16 +74,6 @@ export type CursorPosition = {
   index: number; // 索引
 };
 
-export type DraggingObjectType = {
-  hoverPosition: number;
-  draggingCursorPos: CursorPosition | null;
-  validDropRange: {
-    // 有效的放置范围
-    s: number;
-    e: number;
-  };
-};
-
 // constants
 const BreakRegex = /(\r\n|\r|\n)/g;
 
@@ -115,14 +103,6 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
     useState<GapFilledTextRangeByIndex>({});
   const [lineRange, _setLineRange] = useState<LineRange>(null);
   const [byLine, setByLine] = useState<SplittedByLineTextRange[]>([]);
-  const [draggingObject, setDraggingObject] = useState<DraggingObjectType>({
-    hoverPosition: -1,
-    draggingCursorPos: null,
-    validDropRange: {
-      s: -1,
-      e: -1,
-    },
-  });
   const [activatedObject, setActivatedObject] =
     useState<ActivatedTextRange | null>(null);
 
@@ -228,14 +208,12 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
         chunks, // 换行符分块文本
         byLine, // 按行切分的文本
         gapFilledByIndex, // 按总索引的文本范围
-        draggingObject, // 拖动对象
         activatedObject, // 激活对象
         setFullText, // 设置全文文本
         setTextRanges, // 设置文本区间 SOT
         setNewLineRange, // 设置新的行区间
         setActivatedRange, // 设置激活区间
         setVisibleRange, // 设置可视区间
-        setDraggingObject, // 设置拖动对象
       }}
     >
       <DndProvider debugMode={true} backend={HTML5Backend}>
@@ -255,10 +233,6 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
           <div>
             <h5>Range分段:</h5>
             <pre>{JSON.stringify(textRanges, null, 2)}</pre>
-          </div>
-          <div>
-            <h5>拖动对象:</h5>
-            <pre>{JSON.stringify(draggingObject, null, 2)}</pre>
           </div>
           <div>
             <h5>可见行范围:</h5>

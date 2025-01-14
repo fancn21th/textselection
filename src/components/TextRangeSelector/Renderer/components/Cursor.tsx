@@ -11,7 +11,7 @@ export function Cursor({ pos }: { pos: CursorPosition }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "CURSOR",
     item: () => {
-      setIsDragging();
+      setIsDragging(pos);
       return pos;
     },
     collect: (monitor) => ({

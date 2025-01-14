@@ -91,6 +91,7 @@ function Text() {
           );
         }}
       </List>
+      {/* DndDragHandlerLayer 并不是针对行 而是针对整个可视区域 */}
       <DndDragHandlerLayer />
     </>
   );

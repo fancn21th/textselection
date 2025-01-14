@@ -18,7 +18,7 @@ function Render({ text }: { text: string }) {
         e: 20,
       },
       {
-        s: 15,
+        s: 44,
         e: 100,
       },
     ]);
