@@ -12,16 +12,11 @@ const DndDragHandler = React.memo(
     startCoords: CoordsWithPos;
     endCoords: CoordsWithPos;
   }) => {
-    console.log({ DndDragHandler });
-
     return (
       <div className="w-[100%] h-[600px] bg-transparent absolute left-0 top-0 pointer-events-none">
         {startCoords.pos.index !== -1 && (
           <div
-            className={clsx(
-              "font-extrabold text-pink-500",
-              "absolute z-50 cursor-move pointer-events-auto"
-            )}
+            className={clsx("absolute z-50 pointer-events-auto")}
             style={{
               left: `${startCoords.left}px`,
               top: `${startCoords.top}px`,
@@ -32,10 +27,7 @@ const DndDragHandler = React.memo(
         )}
         {endCoords.pos.index !== -1 && (
           <div
-            className={clsx(
-              "font-extrabold text-pink-500",
-              "absolute z-50 cursor-move pointer-events-auto"
-            )}
+            className={clsx("absolute z-50 pointer-events-auto")}
             style={{ left: `${endCoords.left}px`, top: `${endCoords.top}px` }}
           >
             <Cursor pos={endCoords.pos} />

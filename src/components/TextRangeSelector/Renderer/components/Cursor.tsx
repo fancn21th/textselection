@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { useDrag } from "react-dnd";
 import clsx from "clsx";
-import { CursorPosition } from "../../context/RangeContext";
+import { CursorPosition, RangeContext } from "../../context/RangeContext";
 import { DndContext } from "../../context/DndContext";
 
 export function Cursor({ pos }: { pos: CursorPosition }) {
+  const { activatedObject } = useContext(RangeContext);
   const { setIsDragging, setIsDropping } = useContext(DndContext);
 
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -26,9 +27,8 @@ export function Cursor({ pos }: { pos: CursorPosition }) {
       className={clsx(
         // "text-transparent",
         "font-extrabold text-pink-500",
-        "absolute z-50 cursor-move",
-        "pointer-events-auto",
-        isDragging && "opacity-50"
+        "cursor-move",
+        (isDragging || !activatedObject) && "opacity-0"
       )}
       ref={drag}
     >
