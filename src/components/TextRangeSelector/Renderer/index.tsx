@@ -10,20 +10,6 @@ type ByKey = {
   [key: number]: SplittedByLineTextRange[];
 };
 
-// 动态计算每行的高度
-const getLineHeight = (line: string) => {
-  const tempElement = document.createElement("div");
-  tempElement.style.position = "absolute";
-  tempElement.style.visibility = "hidden";
-  tempElement.style.whiteSpace = "pre-wrap";
-  tempElement.style.width = "100%";
-  tempElement.innerText = line;
-  document.body.appendChild(tempElement);
-  const height = tempElement.getBoundingClientRect().height;
-  document.body.removeChild(tempElement);
-  return height;
-};
-
 function Text() {
   const { setNewLineRange, chunks, byLine, setVisibleRange, activatedObject } =
     useContext(RangeContext);
@@ -39,20 +25,46 @@ function Text() {
     }, {});
   }, [byLine]);
 
-  console.log({ byLineGroupedByKey });
-
   // 缓存每行的高度
-  const lineHeights = chunks.map(getLineHeight);
+  const lineHeightCache = new Map<number, number>();
 
-  // 动态计算每行的高度
-  const getItemSize = (index: number) => lineHeights[index];
+  // 动态计算行高
+  const getLineHeight = (line: string, index: number) => {
+    if (lineHeightCache.has(index)) {
+      return lineHeightCache.get(index); // 返回缓存的高度
+    }
+
+    console.log("计算行高", index);
+
+    const tempElement = document.createElement("div");
+    tempElement.style.position = "absolute";
+    tempElement.style.visibility = "hidden";
+    tempElement.style.whiteSpace = "pre-wrap";
+    tempElement.style.width = "100%";
+    tempElement.innerText = line;
+    document.body.appendChild(tempElement);
+    const height = tempElement.getBoundingClientRect().height;
+    document.body.removeChild(tempElement);
+
+    lineHeightCache.set(index, height); // 缓存高度
+    return height;
+  };
+
+  // 动态获取每行的高度
+  const getItemSize = (index: number) => {
+    const line = chunks[index];
+    return getLineHeight(line, index) || 20;
+  };
+
+  console.log({ byLineGroupedByKey });
 
   return (
     <List
       height={600} // 父容器高度
-      itemCount={chunks.length} // 总块数
       itemSize={getItemSize} // 每行高度
+      itemCount={chunks.length} // 总块数
       width="100%" // 宽度适应父容器
+      estimatedItemSize={20} // 预估行高，用于优化初始渲染
       onItemsRendered={({
         visibleStartIndex,
         visibleStopIndex,
