@@ -134,10 +134,11 @@ export const RangeProvider = ({ children }: { children: ReactNode }) => {
       text,
       matches.map((m) => m.index)
     );
-    const _chunks = brokenLines.flatMap((brokenLine) =>
-      splitByChunkSize(brokenLine, LineCharCount)
-    );
-    setChunks(_chunks);
+    setChunks(brokenLines);
+    // const _chunks = brokenLines.flatMap((brokenLine) =>
+    //   splitByChunkSize(brokenLine, LineCharCount)
+    // );
+    // setChunks(_chunks);
   };
 
   // 计算派生状态
