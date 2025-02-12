@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "react";
 import { RangeContext, SplittedByLineTextRange } from "../context/RangeContext";
-import { FixedSizeList as List } from "react-window";
+import { VariableSizeList as List } from "react-window";
 import clsx from "clsx";
 import DndDragLayer from "./DndDragLayer";
 import DndDropLayer from "./DndDropLayer";
@@ -8,6 +8,20 @@ import BackgroundLayer from "./BackgroundLayer";
 
 type ByKey = {
   [key: number]: SplittedByLineTextRange[];
+};
+
+// 动态计算每行的高度
+const getLineHeight = (line: string) => {
+  const tempElement = document.createElement("div");
+  tempElement.style.position = "absolute";
+  tempElement.style.visibility = "hidden";
+  tempElement.style.whiteSpace = "pre-wrap";
+  tempElement.style.width = "100%";
+  tempElement.innerText = line;
+  document.body.appendChild(tempElement);
+  const height = tempElement.getBoundingClientRect().height;
+  document.body.removeChild(tempElement);
+  return height;
 };
 
 function Text() {
@@ -27,11 +41,17 @@ function Text() {
 
   console.log({ byLineGroupedByKey });
 
+  // 缓存每行的高度
+  const lineHeights = chunks.map(getLineHeight);
+
+  // 动态计算每行的高度
+  const getItemSize = (index: number) => lineHeights[index];
+
   return (
     <List
       height={600} // 父容器高度
       itemCount={chunks.length} // 总块数
-      itemSize={40} // 每行高度
+      itemSize={getItemSize} // 每行高度
       width="100%" // 宽度适应父容器
       onItemsRendered={({
         visibleStartIndex,
